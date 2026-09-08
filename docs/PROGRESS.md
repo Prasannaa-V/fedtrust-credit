@@ -264,3 +264,19 @@ PASS  test_consistency_gain_zero_recovers_fedavg   ← now passes (no flwr neede
 - Full findings logged to `results/gain_sweep/summary.md` and `docs/DECISIONS.md` under `D-018`.
 
 ---
+
+## Session 7 — 2026-09-08 ~21:45–21:50 IST
+
+**Phase**: GitHub Repository Initialization & Push ✅
+
+**What ran**:
+1. Initialized git repository on branch `main` in `fedtrust-credit/`.
+2. Created `.gitignore` excluding raw 1.6GB Lending Club dataset and `.venv/`.
+3. Created publication-grade `README.md` and MIT `LICENSE`.
+4. Copied `docs/initial_review_report.md` into repository docs.
+5. Created private GitHub repository `Prasannaa-V/fedtrust-credit` via `gh cli`.
+6. Pushed full codebase, tests, benchmark evaluation results, and plots to remote `origin/main`.
+
+**Remote URL**: `https://github.com/Prasannaa-V/fedtrust-credit`
+
+---
