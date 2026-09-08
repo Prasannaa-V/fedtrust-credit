@@ -1,0 +1,34 @@
+{
+  "round": 3,
+  "variant": "ours",
+  "pooled_accuracy": 0.825981,
+  "pooled_auc": 0.656452,
+  "pooled_f1": 0.115635,
+  "global_consistency": 0.808522,
+  "consistency_gain": 2.0,
+  "weight_bytes_per_round": 3188672,
+  "shap_bytes_per_round": 1008,
+  "per_client": [
+    {
+      "client_id": "client_1",
+      "accuracy": 0.8936388835786656,
+      "auc": 0.6596824312548015,
+      "f1": 0.00044913541432741973,
+      "num_examples": 502172
+    },
+    {
+      "client_id": "client_2",
+      "accuracy": 0.7118426083631687,
+      "auc": 0.6487802192458422,
+      "f1": 0.3107748586631194,
+      "num_examples": 230148
+    },
+    {
+      "client_id": "client_3",
+      "accuracy": 0.7071305206020232,
+      "auc": 0.6586637013630112,
+      "f1": 0.3150605885747259,
+      "num_examples": 64848
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "round": 5,
+  "variant": "fedavg",
+  "pooled_accuracy": 0.825976,
+  "pooled_auc": 0.656436,
+  "pooled_f1": 0.119028,
+  "global_consistency": 0.81629,
+  "weight_bytes_per_round": 3188672,
+  "shap_bytes_per_round": 0,
+  "per_client": [
+    {
+      "client_id": "client_1",
+      "accuracy": 0.8936229529089403,
+      "auc": 0.6597260725109679,
+      "f1": 0.0002994236095516131,
+      "num_examples": 502172
+    },
+    {
+      "client_id": "client_2",
+      "accuracy": 0.7117904689075046,
+      "auc": 0.6488535439784493,
+      "f1": 0.31989500881761884,
+      "num_examples": 230148
+    },
+    {
+      "client_id": "client_3",
+      "accuracy": 0.7073772514187022,
+      "auc": 0.6578738929262699,
+      "f1": 0.3255615581461473,
+      "num_examples": 64848
+    }
+  ]
+}

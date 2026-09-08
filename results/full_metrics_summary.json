@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "num_rounds": 20,
+    "num_clients": 3,
+    "consistency_gain": 1.0,
+    "dataset": "Lending Club (accepted 2007-2018)",
+    "total_cleaned_rows": 1344976
+  },
+  "pooled_metrics": {
+    "fedavg": {
+      "accuracy": 0.825735,
+      "auc": 0.656463,
+      "f1": 0.118729,
+      "final_consistency": 0.812319,
+      "steady_state_consistency_mean": 0.8113711764705882
+    },
+    "ours": {
+      "accuracy": 0.825675,
+      "auc": 0.656529,
+      "f1": 0.118573,
+      "final_consistency": 0.814143,
+      "steady_state_consistency_mean": 0.8118045294117647
+    },
+    "centralized": {
+      "accuracy": 0.8284193202003071,
+      "auc": 0.7224833022274112,
+      "f1": 0.09434012236141642,
+      "explanation_consistency": 0.761988
+    }
+  },
+  "per_client_metrics": {
+    "fedavg": {
+      "client_1": {
+        "accuracy": 0.8936388835786656,
+        "auc": 0.6599823650267074,
+        "f1": 0.00044913541432741973
+      },
+      "client_2": {
+        "accuracy": 0.711425492717856,
+        "auc": 0.6485097618516598,
+        "f1": 0.3192850114791735
+      },
+      "client_3": {
+        "accuracy": 0.7055884529977794,
+        "auc": 0.6574358710921772,
+        "f1": 0.32288267839409845
+      }
+    },
+    "ours": {
+      "client_1": {
+        "accuracy": 0.8936388835786656,
+        "auc": 0.6599823790427408,
+        "f1": 0.00044913541432741973
+      },
+      "client_2": {
+        "accuracy": 0.7113907330807466,
+        "auc": 0.648509722010484,
+        "f1": 0.3191471914719147
+      },
+      "client_3": {
+        "accuracy": 0.7049716259560819,
+        "auc": 0.6582459121022102,
+        "f1": 0.3214640374521209
+      }
+    },
+    "centralized": {
+      "client_1": {
+        "accuracy": 0.8936468489135283,
+        "auc": 0.660479827425519,
+        "f1": 0.0004491690372810301
+      },
+      "client_2": {
+        "accuracy": 0.7179429246758664,
+        "auc": 0.6483819188969566,
+        "f1": 0.14336236474003694
+      },
+      "client_3": {
+        "accuracy": 0.7153960029607698,
+        "auc": 0.6559935367953379,
+        "f1": 0.15401540154015403
+      }
+    }
+  },
+  "communication_overhead": {
+    "fedavg": {
+      "weights_bytes_per_round": 3188672,
+      "shap_bytes_per_round": 0,
+      "total_bytes_per_round": 3188672
+    },
+    "ours": {
+      "weights_bytes_per_round": 3188672,
+      "shap_bytes_per_round": 1008,
+      "total_bytes_per_round": 3189680,
+      "overhead_percentage": 0.03161190614776308
+    }
+  },
+  "fairness_spread": {
+    "fedavg": {
+      "accuracy_spread": 0.18805043058088622,
+      "f1_spread": 0.32243354297977106,
+      "min_acc": 0.7055884529977794,
+      "max_acc": 0.8936388835786656,
+      "min_f1": 0.00044913541432741973,
+      "max_f1": 0.32288267839409845
+    },
+    "ours": {
+      "accuracy_spread": 0.18866725762258374,
+      "f1_spread": 0.3210149020377935,
+      "min_acc": 0.7049716259560819,
+      "max_acc": 0.8936388835786656,
+      "min_f1": 0.00044913541432741973,
+      "max_f1": 0.3214640374521209
+    },
+    "centralized": {
+      "accuracy_spread": 0.17825084595275853,
+      "f1_spread": 0.153566232502873,
+      "min_acc": 0.7153960029607698,
+      "max_acc": 0.8936468489135283,
+      "min_f1": 0.0004491690372810301,
+      "max_f1": 0.15401540154015403
+    }
+  }
+}

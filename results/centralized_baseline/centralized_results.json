@@ -1,0 +1,36 @@
+{
+  "variant": "centralized",
+  "pooled": {
+    "accuracy": 0.8284193202003071,
+    "auc": 0.7224833022274112,
+    "f1": 0.09434012236141642
+  },
+  "per_client": {
+    "client_1": {
+      "accuracy": 0.8936468489135283,
+      "auc": 0.660479827425519,
+      "f1": 0.0004491690372810301,
+      "num_test": 125544
+    },
+    "client_2": {
+      "accuracy": 0.7179429246758664,
+      "auc": 0.6483819188969566,
+      "f1": 0.14336236474003694,
+      "num_test": 57538
+    },
+    "client_3": {
+      "accuracy": 0.7153960029607698,
+      "auc": 0.6559935367953379,
+      "f1": 0.15401540154015403,
+      "num_test": 16212
+    }
+  },
+  "explanation_consistency": 0.761988,
+  "model_bytes": 1424463,
+  "fairness_spread": {
+    "accuracy_spread": 0.178251,
+    "f1_spread": 0.153566
+  },
+  "n_estimators": 200,
+  "shared_feature_count": 84
+}

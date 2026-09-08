@@ -1,0 +1,62 @@
+{
+  "client_1": {
+    "total_rows": 627716,
+    "n_default": 66773,
+    "n_repaid": 560943,
+    "pct_default": 10.64,
+    "pct_repaid": 89.36,
+    "grade_distribution": {
+      "B": 392657,
+      "A": 235059
+    },
+    "top5_states": {
+      "CA": 93771,
+      "TX": 52296,
+      "NY": 50077,
+      "FL": 43794,
+      "IL": 24982
+    }
+  },
+  "client_2": {
+    "total_rows": 287686,
+    "n_default": 82615,
+    "n_repaid": 205071,
+    "pct_default": 28.72,
+    "pct_repaid": 71.28,
+    "grade_distribution": {
+      "C": 152006,
+      "D": 80779,
+      "E": 38028,
+      "F": 13137,
+      "G": 3736
+    },
+    "top5_states": {
+      "NY": 59761,
+      "FL": 51794,
+      "NJ": 25276,
+      "PA": 24856,
+      "GA": 23371
+    }
+  },
+  "client_3": {
+    "total_rows": 81060,
+    "n_default": 23563,
+    "n_repaid": 57497,
+    "pct_default": 29.07,
+    "pct_repaid": 70.93,
+    "grade_distribution": {
+      "C": 45810,
+      "D": 22553,
+      "E": 8540,
+      "F": 2721,
+      "G": 1436
+    },
+    "top5_states": {
+      "CA": 19083,
+      "TX": 11066,
+      "IL": 4704,
+      "OH": 4047,
+      "MI": 3724
+    }
+  }
+}

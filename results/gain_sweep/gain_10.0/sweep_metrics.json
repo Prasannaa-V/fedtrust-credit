@@ -1,0 +1,9 @@
+{
+  "gain": 10.0,
+  "elapsed_sec": 1538.3,
+  "final_accuracy": 0.82585,
+  "final_auc": 0.656342,
+  "final_f1": 0.11866,
+  "final_consistency": 0.814089,
+  "steady_state_consistency_mean": 0.8127807058823528
+}
