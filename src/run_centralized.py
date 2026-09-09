@@ -61,14 +61,16 @@ if __name__ == "__main__":
     model = lgb.LGBMClassifier(
         objective="binary",
         num_leaves=63,
-        learning_rate=0.05,
-        n_estimators=200,
+        learning_rate=0.03,
+        n_estimators=300,
         n_jobs=-1,
         random_state=42,
         verbose=-1,
+        min_child_samples=30,
         subsample=0.8,
         colsample_bytree=0.8,
-        min_child_samples=50,
+        reg_alpha=0.1,
+        reg_lambda=1.0,
     )
     model.fit(X_train_all, y_train_all)
     print("[centralized] Training complete.")

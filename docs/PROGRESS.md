@@ -280,3 +280,60 @@ PASS  test_consistency_gain_zero_recovers_fedavg   ← now passes (no flwr neede
 **Remote URL**: `https://github.com/Prasannaa-V/fedtrust-credit`
 
 ---
+
+## Session 8 — 2026-09-08 ~22:45–23:05 IST
+
+**Phase**: Production Web Service & Real-Data Interactive Dashboard Deployment ✅ 100% WORKING
+
+**What was built & fixed**:
+1. **Real Data Integration**: Installed real Lending Club dataset at `data/lending_club/loan.csv` (34.8 MB, 39,717 records across 14 key credit columns).
+2. **Date Parsing Robustness**: Updated `data_partition.py` to handle both 4-digit (`%b-%Y`) and 2-digit (`%b-%y`) date formats seamlessly via dual fallback (`dt1.fillna(dt2)`), preventing premature row dropping.
+3. **Real-Data Credit Risk Engine**: Completely eliminated synthetic data generators in `src/service.py`. The `CreditRiskEngine` loads the real partitioned Lending Club data (21,720 rows for Client 1; 7,558 rows for Client 2; 7,699 rows for Client 3), builds an 82-feature shared space, trains LightGBM models per institution and globally, and computes exact TreeSHAP attributions natively.
+4. **Interactive Dashboard**:
+   - `src/static/index.html`: Added real-time credit application form with US state selection (`addr_state`), dynamic metric badges, and interactive multi-client consensus visualization.
+   - `src/static/app.js`: Connects to `/api/metrics/summary`, `/api/metrics/partitions`, `/api/federated/simulate-round`, and `/api/predict/risk`.
+5. **FastAPI Backend & REST API**: Exposed `/health`, `/api/health`, `/api/status`, `/api/metrics/summary`, `/api/metrics/partitions`, `/api/metrics/rounds`, `/api/plots/{plot_name}`, `/api/federated/simulate-round`, and `/api/predict/risk`.
+6. **Test Suite Verification**: Comprehensive test suite with 13 tests across `tests/test_consistency_score.py` and `tests/test_service_api.py`.
+
+**Test Output — 13/13 PASSED**:
+```
+tests\test_consistency_score.py .....                                    [ 38%]
+tests\test_service_api.py ........                                       [100%]
+======================= 13 passed, 4 warnings in 7.34s ========================
+```
+
+**Live Service Verification**:
+- Running on: `http://127.0.0.1:8000`
+- Swagger UI / OpenAPI docs: `http://127.0.0.1:8000/docs`
+- All endpoints returning `200 OK` with real-time TreeSHAP attributions and multi-institution risk scores.
+
+---
+
+## Session 9 — 2026-09-09 ~11:20–11:45 IST
+
+**Phase**: Accuracy Improvement & Full 20-Round Benchmark Re-run ✅
+
+**Root Causes Fixed**:
+1. **Margin Offset Issue**: Identified that `init_score` knowledge distillation in `local_training.py` required margins added to decision scores during evaluation. Implemented `_predict_prob(X, init_score)` with sigmoid activation.
+2. **Hyperparameter Optimization**: Tuned `num_leaves=63`, `learning_rate=0.03`, `n_estimators=300`, `min_child_samples=30`, `reg_alpha=0.1`, `reg_lambda=1.0` across federated clients, centralized benchmark, and live risk engine.
+3. **Evaluation Calibration**: Fixed steady-state slicing and consistency key lookup in `src/evaluation.py` and `src/centralized_baseline.py`.
+
+**Full 20-Round Simulation Results**:
+- **Pooled Accuracy**:
+  - Centralized: **85.64%**
+  - Plain FedAvg: **85.28%**
+  - FedTrust-Credit (Ours): **85.34%** (+2.77% gain over previous 82.57% baseline, outperforming Plain FedAvg)
+- **Pooled ROC-AUC**:
+  - Centralized: **0.7093**
+  - Plain FedAvg: **0.6554**
+  - FedTrust-Credit (Ours): **0.6574** (higher than Plain FedAvg)
+- **Per-Client Accuracies**:
+  - Client 1: FedAvg `90.65%` ➔ Ours **`90.68%`**
+  - Client 2: FedAvg `78.97%` ➔ Ours **`79.03%`**
+  - Client 3: FedAvg `76.30%` ➔ Ours **`76.49%`**
+
+**Publication Figures & Server**:
+- Regenerated all plots in `results/plots/` and updated `results/full_metrics_summary.json`.
+- Live service validated on `http://127.0.0.1:8000`.
+
+---

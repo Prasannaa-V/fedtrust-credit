@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FedTrust-Credit — Federated Learning Credit Risk Assessment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app-background">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="navbar">
+      <div class="logo-area">
+        <div class="shield-badge">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="logo-text">
+          <h1>FedTrust-Credit</h1>
+          <p class="subtitle">Explanation-Consistency-Aware Federated Learning</p>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" id="navTabs">
+        <button class="nav-tab active" data-tab="tab-benchmarks" id="btnTabBenchmarks">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          Benchmarks
+        </button>
+        <button class="nav-tab" data-tab="tab-simulator" id="btnTabSimulator">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+          Aggregator Sim
+        </button>
+        <button class="nav-tab" data-tab="tab-risk" id="btnTabRisk">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Credit Assessment & SHAP
+        </button>
+        <button class="nav-tab" data-tab="tab-partitions" id="btnTabPartitions">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Non-IID Silos
+        </button>
+      </nav>
+
+      <div class="status-indicator">
+        <span class="pulse-dot"></span>
+        <span class="status-text">Service Active</span>
+        <a href="/docs" target="_blank" class="api-link" title="Open Swagger API documentation">API Docs</a>
+      </div>
+    </header>
+
+    <!-- Hero Meta Bar -->
+    <section class="hero-bar">
+      <div class="hero-chip">
+        <span class="chip-label">Dataset</span>
+        <span class="chip-val">1,344,976 Lending Club Loans</span>
+      </div>
+      <div class="hero-chip">
+        <span class="chip-label">Communication Rounds</span>
+        <span class="chip-val">20 Rounds Evaluated</span>
+      </div>
+      <div class="hero-chip">
+        <span class="chip-label">Attribution Overhead</span>
+        <span class="chip-val highlight">+0.0316% Bandwidth</span>
+      </div>
+      <div class="hero-chip">
+        <span class="chip-label">Consistency Metric</span>
+        <span class="chip-val">0.8141 Final Cons.</span>
+      </div>
+    </section>
+
+    <!-- TAB 1: BENCHMARKS -->
+    <main class="tab-content active" id="tab-benchmarks">
+      <div class="section-title">
+        <h2>Experimental Benchmark Comparison</h2>
+        <p>Comparison across Centralized Benchmark, Plain FedAvg, and FedTrust-Credit across 20 communication rounds.</p>
+      </div>
+
+      <!-- KPI Grid -->
+      <div class="metrics-grid">
+        <div class="card glass-card">
+          <div class="card-header">
+            <h3>Pooled Accuracy</h3>
+            <span class="card-tag">Held-out test set</span>
+          </div>
+          <div class="kpi-value">82.57%</div>
+          <div class="kpi-breakdown">
+            <span class="kpi-row"><span>Centralized:</span> <strong>82.84%</strong></span>
+            <span class="kpi-row"><span>Plain FedAvg:</span> <strong>82.57%</strong></span>
+            <span class="kpi-row highlight"><span>FedTrust-Credit:</span> <strong>82.57%</strong></span>
+          </div>
+        </div>
+
+        <div class="card glass-card">
+          <div class="card-header">
+            <h3>Pooled ROC-AUC</h3>
+            <span class="card-tag">Discrimination</span>
+          </div>
+          <div class="kpi-value">0.6565</div>
+          <div class="kpi-breakdown">
+            <span class="kpi-row"><span>Centralized:</span> <strong>0.7225</strong></span>
+            <span class="kpi-row"><span>Plain FedAvg:</span> <strong>0.6565</strong></span>
+            <span class="kpi-row highlight"><span>FedTrust-Credit:</span> <strong>0.6565</strong></span>
+          </div>
+        </div>
+
+        <div class="card glass-card">
+          <div class="card-header">
+            <h3>Explanation Consistency</h3>
+            <span class="card-tag">Mean Pairwise Cosine</span>
+          </div>
+          <div class="kpi-value success-accent">0.8141</div>
+          <div class="kpi-breakdown">
+            <span class="kpi-row"><span>Centralized:</span> <strong>0.7620</strong></span>
+            <span class="kpi-row"><span>Plain FedAvg:</span> <strong>0.8123</strong></span>
+            <span class="kpi-row highlight"><span>FedTrust-Credit:</span> <strong>0.8141 (+0.18%)</strong></span>
+          </div>
+        </div>
+
+        <div class="card glass-card">
+          <div class="card-header">
+            <h3>Communication Overhead</h3>
+            <span class="card-tag">Per-Round Cost</span>
+          </div>
+          <div class="kpi-value cyan-accent">+0.0316%</div>
+          <div class="kpi-breakdown">
+            <span class="kpi-row"><span>Model Parameters:</span> <strong>3,188,672 B</strong></span>
+            <span class="kpi-row"><span>SHAP Vector:</span> <strong>1,008 B</strong></span>
+            <span class="kpi-row highlight"><span>Total / Round:</span> <strong>3.042 MB</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plots Gallery Section -->
+      <div class="plots-section glass-card">
+        <div class="plots-nav-bar">
+          <h3>Publication Benchmark Plots</h3>
+          <div class="plot-selector-tabs">
+            <button class="plot-btn active" data-plot="consistency_comparison">Consistency Curve</button>
+            <button class="plot-btn" data-plot="accuracy_comparison">Accuracy Trajectory</button>
+            <button class="plot-btn" data-plot="auc_comparison">ROC-AUC</button>
+            <button class="plot-btn" data-plot="per_client_f1">Per-Client F1</button>
+            <button class="plot-btn" data-plot="communication_overhead">Bandwidth Breakdown</button>
+            <button class="plot-btn" data-plot="fairness_spread">Fairness Spread</button>
+          </div>
+        </div>
+        <div class="plot-display-area">
+          <img id="activePlotImg" src="/api/plots/consistency_comparison" alt="FedTrust-Credit Benchmark Plot" />
+          <div class="plot-caption" id="activePlotCaption">
+            <strong>Explanation Consistency Progression:</strong> FedTrust-Credit maintains high cross-institutional attribution agreement throughout 20 federated communication rounds.
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 2: SIMULATOR -->
+    <main class="tab-content" id="tab-simulator">
+      <div class="section-title">
+        <h2>Federated Aggregator & Consensus Simulator</h2>
+        <p>Interact with the exact Section 3.3 aggregation equations in real-time. Adjust CONSISTENCY_GAIN (&gamma;) and inspect pairwise Spearman correlation, per-client agreement scores a<sub>i</sub>, and dynamic weight adjustments w<sub>i</sub>*.</p>
+      </div>
+
+      <div class="simulator-layout">
+        <!-- Controls Panel -->
+        <div class="glass-card sim-controls">
+          <h3>Aggregation Controls</h3>
+          
+          <div class="control-group">
+            <div class="slider-header">
+              <label for="gainSlider">CONSISTENCY_GAIN (&gamma;):</label>
+              <span class="slider-val" id="gainValueDisplay">1.0</span>
+            </div>
+            <input type="range" id="gainSlider" min="0.0" max="10.0" step="0.1" value="1.0" class="range-slider" />
+            <div class="slider-ticks">
+              <span>0.0 (FedAvg)</span>
+              <span>1.0 (Ours)</span>
+              <span>5.0</span>
+              <span>10.0</span>
+            </div>
+            <p class="control-desc">Setting &gamma; = 0.0 recovers standard sample-size FedAvg exactly.</p>
+          </div>
+
+          <div class="control-group">
+            <div class="slider-header">
+              <label for="noiseSlider">Partition Attribution Divergence:</label>
+              <span class="slider-val" id="noiseValueDisplay">0.02</span>
+            </div>
+            <input type="range" id="noiseSlider" min="0.0" max="0.15" step="0.01" value="0.02" class="range-slider" />
+            <p class="control-desc">Simulates demographic feature importance shifts between participating institutions.</p>
+          </div>
+
+          <button id="btnRunSim" class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Recompute Aggregation Weights
+          </button>
+
+          <div class="math-box">
+            <h4>Algorithm Formulation (Section 3.3)</h4>
+            <code>w_i* = (n_i / &Sigma; n) &times; (1 + &gamma; &times; a_i)</code>
+            <p>Normalized such that &Sigma; w_i* = 1.0</p>
+          </div>
+        </div>
+
+        <!-- Simulator Results Display -->
+        <div class="glass-card sim-results">
+          <div class="sim-header">
+            <h3>Calculated Aggregation Weights</h3>
+            <div class="cons-badge">
+              <span>Consensus:</span>
+              <strong id="simGlobalCons">0.8141</strong>
+            </div>
+          </div>
+
+          <!-- Weight Comparison Cards -->
+          <div class="client-weights-grid" id="clientWeightsGrid">
+            <!-- Populated via JavaScript -->
+          </div>
+
+          <!-- Pairwise Correlation Matrix -->
+          <div class="heatmap-section">
+            <h4>Pairwise Explanation Cosine Similarity Matrix</h4>
+            <div class="matrix-container" id="matrixContainer">
+              <!-- Matrix populated via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 3: REAL-TIME RISK ASSESSMENT & SHAP -->
+    <main class="tab-content" id="tab-risk">
+      <div class="section-title">
+        <h2>Real-Time Credit Risk Assessment & TreeSHAP Inspector</h2>
+        <p>Evaluate a prospective loan applicant against the global aggregated federated model. Inspect per-feature SHAP drivers and cross-institution agreement across Bank 1, Bank 2, and Bank 3.</p>
+      </div>
+
+      <div class="risk-layout">
+        <!-- Applicant Form -->
+        <div class="glass-card applicant-form-card">
+          <div class="form-header">
+            <h3>Loan Application Parameters</h3>
+            <div class="presets-dropdown">
+              <label>Preset Personas:</label>
+              <select id="personaSelect" class="select-input">
+                <option value="custom">Custom Applicant</option>
+                <option value="prime" selected>Prime Borrower (Grade A, Low DTI)</option>
+                <option value="balanced">Moderate Risk (Grade C, Balanced)</option>
+                <option value="subprime">Subprime High-Risk (Grade E, High DTI)</option>
+              </select>
+            </div>
+          </div>
+
+          <form id="loanForm" class="grid-form">
+            <div class="input-field">
+              <label for="loanAmnt">Loan Amount ($)</label>
+              <input type="number" id="loanAmnt" min="1000" max="50000" step="500" value="12000" required />
+            </div>
+
+            <div class="input-field">
+              <label for="term">Loan Term</label>
+              <select id="term">
+                <option value="36" selected>36 Months</option>
+                <option value="60">60 Months</option>
+              </select>
+            </div>
+
+            <div class="input-field">
+              <label for="intRate">Interest Rate (%)</label>
+              <input type="number" id="intRate" min="5.0" max="32.0" step="0.1" value="8.9" required />
+            </div>
+
+            <div class="input-field">
+              <label for="grade">Loan Grade</label>
+              <select id="grade">
+                <option value="A" selected>Grade A (Lowest Risk)</option>
+                <option value="B">Grade B</option>
+                <option value="C">Grade C</option>
+                <option value="D">Grade D</option>
+                <option value="E">Grade E</option>
+                <option value="F">Grade F</option>
+                <option value="G">Grade G (Highest Risk)</option>
+              </select>
+            </div>
+
+            <div class="input-field">
+              <label for="annualInc">Annual Income ($)</label>
+              <input type="number" id="annualInc" min="15000" max="1000000" step="1000" value="95000" required />
+            </div>
+
+            <div class="input-field">
+              <label for="dti">Debt-To-Income (DTI %)</label>
+              <input type="number" id="dti" min="1.0" max="50.0" step="0.5" value="13.5" required />
+            </div>
+
+            <div class="input-field">
+              <label for="homeOwnership">Home Ownership</label>
+              <select id="homeOwnership">
+                <option value="MORTGAGE" selected>Mortgage</option>
+                <option value="OWN">Own</option>
+                <option value="RENT">Rent</option>
+              </select>
+            </div>
+
+            <div class="input-field">
+              <label for="purpose">Loan Purpose</label>
+              <select id="purpose">
+                <option value="debt_consolidation" selected>Debt Consolidation</option>
+                <option value="credit_card">Credit Card Refinancing</option>
+                <option value="home_improvement">Home Improvement</option>
+                <option value="small_business">Small Business</option>
+              </select>
+            </div>
+
+            <div class="input-field">
+              <label for="addrState">Borrower State</label>
+              <select id="addrState">
+                <option value="NY" selected>New York (NY)</option>
+                <option value="CA">California (CA)</option>
+                <option value="FL">Florida (FL)</option>
+                <option value="TX">Texas (TX)</option>
+                <option value="NJ">New Jersey (NJ)</option>
+                <option value="PA">Pennsylvania (PA)</option>
+                <option value="VA">Virginia (VA)</option>
+                <option value="GA">Georgia (GA)</option>
+                <option value="MA">Massachusetts (MA)</option>
+                <option value="NC">North Carolina (NC)</option>
+                <option value="IL">Illinois (IL)</option>
+                <option value="OH">Ohio (OH)</option>
+              </select>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-primary" id="btnScoreLoan">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Evaluate Credit Risk & SHAP
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Risk Result Display -->
+        <div class="glass-card risk-result-card">
+          <h3>Assessment Outcome</h3>
+          
+          <div class="verdict-banner" id="verdictBanner">
+            <div class="verdict-score">
+              <div class="score-circle" id="scoreCircle">
+                <span class="score-num" id="scoreNum">--%</span>
+                <span class="score-label">Default Risk</span>
+              </div>
+            </div>
+            <div class="verdict-meta">
+              <div class="tier-pill" id="tierPill">Awaiting Input</div>
+              <h4 id="decisionText">Submit loan details to compute risk verdict</h4>
+              <p class="cons-note" id="consNote">Explanation consensus: --</p>
+            </div>
+          </div>
+
+          <!-- SHAP Explanations Waterfall/Bar -->
+          <div class="shap-section">
+            <h4>TreeSHAP Attribution (Local Feature Importance)</h4>
+            <p class="shap-desc">Green pushes towards Repaid (0); Red pushes towards Default (1).</p>
+            <div class="shap-bars" id="shapBars">
+              <p class="empty-state">Run evaluation to view feature contributions.</p>
+            </div>
+          </div>
+
+          <!-- Multi-client consensus breakdown -->
+          <div class="client-perspectives-box">
+            <h4>Institutional Consensus Perspectives</h4>
+            <div class="perspectives-grid" id="perspectivesGrid">
+              <!-- Filled via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 4: PARTITIONS -->
+    <main class="tab-content" id="tab-partitions">
+      <div class="section-title">
+        <h2>Non-IID Partition & Cross-Silo Demographics</h2>
+        <p>Breakdown of the 1,344,976 cleaned loan records distributed across participating banking silos per Section 3.4.</p>
+      </div>
+
+      <div class="partitions-grid" id="partitionsGrid">
+        <div class="card glass-card silo-card">
+          <div class="silo-tag c1-tag">Bank 1: Prime Silo</div>
+          <h3>Grades A & B Loans</h3>
+          <div class="silo-stat"><strong>627,716</strong> records (62.99%)</div>
+          <div class="silo-bar-box">
+            <div class="silo-split-bar">
+              <div class="bar-repaid" style="width: 89.4%">89.4% Repaid</div>
+              <div class="bar-default" style="width: 10.6%">10.6%</div>
+            </div>
+          </div>
+          <p class="silo-desc">High volume, prime demographic, low default rate. Models trained here prioritize fine-grained interest rate nuances.</p>
+        </div>
+
+        <div class="card glass-card silo-card">
+          <div class="silo-tag c2-tag">Bank 2: East Coast Regional</div>
+          <h3>Geography Partition (16 States)</h3>
+          <div class="silo-stat"><strong>287,686</strong> records (28.87%)</div>
+          <div class="silo-split-bar">
+            <div class="bar-repaid" style="width: 71.3%">71.3% Repaid</div>
+            <div class="bar-default" style="width: 28.7%">28.7%</div>
+          </div>
+          <p class="silo-desc">NY, NJ, PA, FL, NC, etc. Moderate volume, balanced risk distribution across grades C-E.</p>
+        </div>
+
+        <div class="card glass-card silo-card">
+          <div class="silo-tag c3-tag">Bank 3: Recent Cohort</div>
+          <h3>Temporal Partition (2016-12 to 2018-12)</h3>
+          <div class="silo-stat"><strong>81,060</strong> records (8.13%)</div>
+          <div class="silo-split-bar">
+            <div class="bar-repaid" style="width: 70.9%">70.9% Repaid</div>
+            <div class="bar-default" style="width: 29.1%">29.1%</div>
+          </div>
+          <p class="silo-desc">Most recent macroeconomic window. Elevated default frequency, highest sensitivity to debt-to-income and macroeconomic indicators.</p>
+        </div>
+      </div>
+
+      <div class="glass-card why-drift-box">
+        <h3>Why Explanation Drift Undermines Standard FedAvg</h3>
+        <p>In standard federated averaging, models are weighted purely by sample count (Bank 1: 63%, Bank 2: 29%, Bank 3: 8%). If Bank 3 or Bank 2 overfits to its regional or subprime nuances, standard aggregation remains blind to its divergent decision boundaries. <strong>FedTrust-Credit</strong> computes TreeSHAP feature attributions on a reference anchor distribution, rewarding consensus agreement with peer explanations.</p>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <p><strong>FedTrust-Credit</strong> &bull; School of Computer Science Engineering and Information Systems, Department of IT, VIT Vellore</p>
+        <p class="credits">Prashaanth Raj J M (23BIT0173) &bull; Prasannaa V (23BIT0041) &bull; Haswanth K (23BIT0359) &bull; Guided by Dr. Siva Rama Krishnan S</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

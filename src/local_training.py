@@ -37,14 +37,16 @@ class FederatedClient:
     LGB_PARAMS = {
         "objective":         "binary",
         "num_leaves":        63,
-        "learning_rate":     0.05,
-        "n_estimators":      100,       # D-012: 100 for federated clients
+        "learning_rate":     0.03,
+        "n_estimators":      300,
         "n_jobs":            -1,
         "random_state":      42,
         "verbose":           -1,
-        "min_child_samples": 50,
+        "min_child_samples": 30,
         "subsample":         0.8,
         "colsample_bytree":  0.8,
+        "reg_alpha":         0.1,
+        "reg_lambda":        1.0,
     }
 
     def __init__(
@@ -63,7 +65,14 @@ class FederatedClient:
         self.n_features  = X_train.shape[1]
         self._is_fitted  = False
         self._soft_labels: np.ndarray | None = None
+        self._current_init_score: float | None = None
         self.model: lgb.LGBMClassifier | None = None
+
+    def _predict_prob(self, X: pd.DataFrame, init_score_val: float | None) -> np.ndarray:
+        raw = self.model.predict(X, raw_score=True)
+        if init_score_val is not None:
+            raw = raw + init_score_val
+        return 1.0 / (1.0 + np.exp(-np.clip(raw, -30.0, 30.0)))
 
     # ── Federated interface ─────────────────────────────────────────────────
 
@@ -71,7 +80,8 @@ class FederatedClient:
         """Local model's predicted probabilities on training set."""
         if not self._is_fitted:
             return [np.full(len(self.X_train), 0.5, dtype=np.float32)]
-        return [self.model.predict_proba(self.X_train)[:, 1].astype(np.float32)]
+        probs = self._predict_prob(self.X_train, self._current_init_score)
+        return [probs.astype(np.float32)]
 
     def set_parameters(self, global_params: list[np.ndarray]) -> None:
         """Receive aggregated signal from server."""
@@ -93,30 +103,32 @@ class FederatedClient:
         """
         self.set_parameters(global_params)
 
-        # Sample weights: blend hard labels with global soft signal
+        # Use global soft-label signal as init_score for knowledge distillation
+        init_score = None
         if self._soft_labels is not None and self._is_fitted:
-            alpha = 0.3  # 30% global signal weight
-            sample_weight = (
-                0.5 + 0.5 * np.abs(self.y_train.values.astype(float) - self._soft_labels)
-            ).clip(0.1, 2.0)
+            # Convert probability to log-odds for LightGBM's init_score
+            p = np.clip(self._soft_labels, 1e-6, 1.0 - 1e-6)
+            scalar_p = float(np.mean(p))
+            self._current_init_score = float(np.log(scalar_p / (1.0 - scalar_p)))
+            init_score = np.full(len(self.X_train), self._current_init_score)
         else:
-            sample_weight = None
+            self._current_init_score = None
 
         # Train fresh model each round
         self.model = lgb.LGBMClassifier(**self.LGB_PARAMS)
         self.model.fit(
             self.X_train,
             self.y_train,
-            sample_weight=sample_weight,
+            init_score=init_score,
         )
         self._is_fitted = True
 
         # SHAP vector (D-006, D-010)
         shap_vec = compute_shap_vector(self.model, self.X_train)
 
-        # Metrics
-        y_pred = self.model.predict(self.X_test)
-        y_prob = self.model.predict_proba(self.X_test)[:, 1]
+        # Metrics with init_score offset applied
+        y_prob = self._predict_prob(self.X_test, self._current_init_score)
+        y_pred = (y_prob >= 0.5).astype(int)
         acc = float(accuracy_score(self.y_test, y_pred))
         auc = float(roc_auc_score(self.y_test, y_prob))
         f1  = float(f1_score(self.y_test, y_pred, zero_division=0))
@@ -147,8 +159,8 @@ class FederatedClient:
         """Evaluate local model on local test set."""
         if not self._is_fitted:
             return 1.0, len(self.X_test), {"accuracy": 0.0, "auc": 0.5, "f1": 0.0}
-        y_pred = self.model.predict(self.X_test)
-        y_prob = self.model.predict_proba(self.X_test)[:, 1]
+        y_prob = self._predict_prob(self.X_test, self._current_init_score)
+        y_pred = (y_prob >= 0.5).astype(int)
         loss = float(np.mean((y_prob - self.y_test.values.astype(float)) ** 2))
         acc  = float(accuracy_score(self.y_test, y_pred))
         auc  = float(roc_auc_score(self.y_test, y_prob))

@@ -32,6 +32,9 @@ REQUIRED_COLS = [
     "loan_amnt", "term", "int_rate", "grade", "sub_grade",
     "annual_inc", "dti", "home_ownership", "purpose",
     "addr_state", "issue_d", "loan_status",
+    "emp_length", "revol_bal", "revol_util",
+    "total_acc", "open_acc", "pub_rec",
+    "installment", "verification_status",
 ]
 
 # Optional: loan_id if present (used for record-keeping only, not training)
@@ -88,8 +91,10 @@ def load_and_clean(csv_path: str | Path) -> pd.DataFrame:
     print(f"[data_partition]   After dropping unknown statuses: {len(df):,}")
     print(f"[data_partition]   Class distribution: {df['target'].value_counts(normalize=True).to_dict()}")
 
-    # ── issue_d → datetime ──────────────────────────────────────────────────
-    df["issue_d"] = pd.to_datetime(df["issue_d"], format="%b-%Y", errors="coerce")
+    # ── issue_d → datetime (support both 4-digit and 2-digit years) ──────
+    dt1 = pd.to_datetime(df["issue_d"], format="%b-%Y", errors="coerce")
+    dt2 = pd.to_datetime(df["issue_d"], format="%b-%y", errors="coerce")
+    df["issue_d"] = dt1.fillna(dt2)
 
     # ── int_rate: strip '%' if present ─────────────────────────────────────
     if df["int_rate"].dtype == object:
@@ -99,14 +104,39 @@ def load_and_clean(csv_path: str | Path) -> pd.DataFrame:
     if df["term"].dtype == object:
         df["term"] = df["term"].str.strip().str.extract(r"(\d+)").astype(float)
 
+    # ── emp_length: extract numeric years ("10+ years" → 10, "< 1 year" → 0)
+    if "emp_length" in df.columns:
+        df["emp_length"] = (
+            df["emp_length"]
+            .str.extract(r"(\d+)", expand=False)
+            .astype(float)
+        )
+        df["emp_length"] = df["emp_length"].fillna(0)
+
+    # ── revol_util: strip '%' if present ───────────────────────────────────
+    if "revol_util" in df.columns and df["revol_util"].dtype == object:
+        df["revol_util"] = df["revol_util"].str.rstrip("%").astype(float)
+
     # ── Drop rows with null in key columns ─────────────────────────────────
     key_cols = ["grade", "addr_state", "issue_d", "annual_inc", "dti", "loan_amnt"]
     before = len(df)
     df = df.dropna(subset=key_cols)
     print(f"[data_partition]   After dropping nulls in key cols: {len(df):,} (dropped {before - len(df):,})")
 
+    # ── Engineered features ────────────────────────────────────────────────
+    # Debt-to-income ratio interaction with interest rate
+    if "dti" in df.columns and "int_rate" in df.columns:
+        df["dti_x_int_rate"] = df["dti"] * df["int_rate"]
+
+    # Installment as fraction of monthly income
+    if "installment" in df.columns and "annual_inc" in df.columns:
+        monthly_inc = df["annual_inc"] / 12.0
+        df["installment_to_income"] = (
+            df["installment"] / monthly_inc.clip(lower=1.0)
+        )
+
     # ── One-hot encode categoricals ─────────────────────────────────────────
-    cat_cols = ["term", "grade", "sub_grade", "home_ownership", "purpose", "addr_state"]
+    cat_cols = ["term", "grade", "sub_grade", "home_ownership", "purpose", "addr_state", "verification_status"]
     for col in cat_cols:
         if col in df.columns:
             df[col] = df[col].astype(str).str.strip().str.upper()
@@ -164,7 +194,7 @@ def prepare_features(
     same feature space.
     Returns (X, y) ready for model training.
     """
-    drop_cols = ["loan_status", "issue_d", ID_COL, "sub_grade"]
+    drop_cols = ["loan_status", "issue_d", ID_COL]
     feature_df = df.drop(columns=[c for c in drop_cols if c in df.columns])
 
     y = feature_df.pop("target")
@@ -178,9 +208,10 @@ def prepare_features(
 
     # Align to shared feature space if provided
     if feature_cols is not None:
-        for col in feature_cols:
-            if col not in feature_df.columns:
-                feature_df[col] = 0
+        missing = [col for col in feature_cols if col not in feature_df.columns]
+        if missing:
+            zeros = pd.DataFrame(0, index=feature_df.index, columns=missing)
+            feature_df = pd.concat([feature_df, zeros], axis=1)
         feature_df = feature_df[feature_cols]
 
     return feature_df, y
