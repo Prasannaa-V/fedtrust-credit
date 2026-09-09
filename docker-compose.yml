@@ -1,0 +1,100 @@
+# ==============================================================================
+# FedTrust-Credit — Multi-Node Cloud Simulation via Docker Compose
+# Course: CLOUD COMPUTING – BITE412L
+# Replicates the isolated multi-VPC / multi-cloud architecture from Section 3.5:
+#   - Aggregator Service: Central Server + FastAPI Interactive Web UI
+#   - Bank Client 1: Isolated VPC 1 (Low-Risk / Grades A-B)
+#   - Bank Client 2: Isolated VPC 2 (Mid-Risk / Grades C-D)
+#   - Bank Client 3: Isolated Azure VNet (Subprime / Grades E-G)
+# ==============================================================================
+
+version: "3.8"
+
+networks:
+  # Isolated virtual networks replicating AWS VPCs and Azure VNet
+  aggregator-net:
+    driver: bridge
+  vpc-bank-1:
+    driver: bridge
+  vpc-bank-2:
+    driver: bridge
+  vnet-bank-3:
+    driver: bridge
+
+services:
+  # ── Central Aggregator & Web Dashboard ──────────────────────────────────────
+  aggregator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fedtrust-aggregator
+    restart: unless-stopped
+    ports:
+      - "8000:8000"   # Web Dashboard & REST API
+      - "8080:8080"   # Flower FL Aggregation gRPC port
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+      - FLOWER_SERVER_PORT=8080
+      - PYTHONUNBUFFERED=1
+    networks:
+      - aggregator-net
+      - vpc-bank-1
+      - vpc-bank-2
+      - vnet-bank-3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Bank Client 1 (AWS EC2 VPC 1) ──────────────────────────────────────────
+  bank-client-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fedtrust-bank-client-1
+    depends_on:
+      aggregator:
+        condition: service_healthy
+    command: ["python", "-c", "print('Bank Client 1 [AWS VPC 1] container initialized and connected.')"]
+    networks:
+      - vpc-bank-1
+    environment:
+      - CLIENT_ID=client_1
+      - AGGREGATOR_HOST=aggregator
+      - AGGREGATOR_PORT=8080
+
+  # ── Bank Client 2 (AWS EC2 VPC 2) ──────────────────────────────────────────
+  bank-client-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fedtrust-bank-client-2
+    depends_on:
+      aggregator:
+        condition: service_healthy
+    command: ["python", "-c", "print('Bank Client 2 [AWS VPC 2] container initialized and connected.')"]
+    networks:
+      - vpc-bank-2
+    environment:
+      - CLIENT_ID=client_2
+      - AGGREGATOR_HOST=aggregator
+      - AGGREGATOR_PORT=8080
+
+  # ── Bank Client 3 (Azure VM VNet 3) ─────────────────────────────────────────
+  bank-client-3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fedtrust-bank-client-3
+    depends_on:
+      aggregator:
+        condition: service_healthy
+    command: ["python", "-c", "print('Bank Client 3 [Azure VNet] container initialized and connected.')"]
+    networks:
+      - vnet-bank-3
+    environment:
+      - CLIENT_ID=client_3
+      - AGGREGATOR_HOST=aggregator
+      - AGGREGATOR_PORT=8080

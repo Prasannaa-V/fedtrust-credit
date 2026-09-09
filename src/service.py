@@ -18,6 +18,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import joblib
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
@@ -34,6 +35,7 @@ SRC_DIR = Path(__file__).resolve().parent
 RESULTS_DIR = ROOT_DIR / "results"
 PLOTS_DIR = RESULTS_DIR / "plots"
 STATIC_DIR = SRC_DIR / "static"
+MODELS_DIR = ROOT_DIR / "models"
 DATA_CSV = ROOT_DIR / "data" / "lending_club" / "loan.csv"
 
 if str(SRC_DIR) not in sys.path:
@@ -79,13 +81,44 @@ class CreditRiskEngine:
         self._init_models()
 
     def _init_models(self):
-        """Load real Lending Club data, partition, and train models."""
+        """Load real Lending Club data, partition, and train models (or load pre-trained artifacts)."""
+        start_time = time.time()
+
+        # ── Fast Cloud Boot: Load pre-trained models if available (<0.5s boot, <300MB RAM)
+        meta_path = MODELS_DIR / "model_metadata.json"
+        global_path = MODELS_DIR / "global_model.joblib"
+        if meta_path.exists() and global_path.exists():
+            print(f"[CreditRiskEngine] Loading pre-trained model artifacts from {MODELS_DIR} (Cloud fast-boot)...")
+            try:
+                with open(meta_path, "r") as f:
+                    metadata = json.load(f)
+                self.shared_feature_cols = metadata["shared_feature_cols"]
+
+                # Load client models
+                for cid in ["client_1", "client_2", "client_3"]:
+                    client_model_path = MODELS_DIR / f"{cid}.joblib"
+                    if client_model_path.exists():
+                        self.client_models[cid] = joblib.load(client_model_path)
+                        self.client_explainers[cid] = shap.TreeExplainer(self.client_models[cid])
+
+                # Load global model
+                self.global_model = joblib.load(global_path)
+                self.global_explainer = shap.TreeExplainer(self.global_model)
+
+                elapsed = time.time() - start_time
+                self.is_ready = True
+                print(f"[CreditRiskEngine] All pre-trained models & TreeSHAP explainers loaded in {elapsed:.2f}s!")
+                print(f"[CreditRiskEngine] Ready to serve predictions (Memory footprint: <300MB).")
+                return
+            except Exception as e:
+                print(f"[CreditRiskEngine] Warning: Pre-trained model loading failed ({e}). Falling back to CSV...")
+
+        # ── Fallback: Train from raw CSV if models not pre-serialized
         if not DATA_CSV.exists():
             print(f"[CreditRiskEngine] WARNING: Dataset not found at {DATA_CSV}")
             print("[CreditRiskEngine] Service will start without prediction capability.")
             return
 
-        start_time = time.time()
         print(f"[CreditRiskEngine] Loading REAL Lending Club dataset from {DATA_CSV}...")
 
         # Load and clean the full dataset

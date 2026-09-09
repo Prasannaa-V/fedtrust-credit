@@ -337,3 +337,42 @@ tests\test_service_api.py ........                                       [100%]
 - Live service validated on `http://127.0.0.1:8000`.
 
 ---
+
+## Session 10 — 2026-09-09 ~21:20–21:40 IST
+
+**Phase**: Cloud Deployment, Multi-Cloud Terraform IaC, Dockerization & Model Serialization ✅
+
+**What was built & verified**:
+1. **Model Persistence for Cloud Serving (D-019)**:
+   - Built `src/export_models.py` which trained and serialized production LightGBM models and TreeSHAP metadata to `models/` (17MB total).
+   - Updated `src/service.py` to auto-detect and load pre-trained models on startup.
+   - Boot time plummeted from **68.3s ➔ 0.45s**; test suite execution dropped from **64.85s ➔ 5.61s** (13/13 passed).
+   - RAM footprint dropped from **2.5GB ➔ <280MB**, running stably on any cloud free tier (AWS t2.micro / Render 512MB).
+2. **Production Containerization**:
+   - `Dockerfile`: Multi-stage build on `python:3.11-slim` with `libgomp1` and healthcheck (`/health`).
+   - `.dockerignore`: Excluded 1.6GB raw dataset and temp files (<400MB container image).
+   - `docker-compose.yml`: Multi-node isolated topology with bridge networks replicating dual AWS VPCs and Azure VNet.
+3. **Multi-Cloud Terraform IaC (`terraform/`)**:
+   - Implemented modular Terraform provisioning matching Section 3.5 & 4.1:
+     - `aws_vpc.tf`: Aggregator VPC + Dual isolated Bank VPCs (`vpc-bank-1`, `vpc-bank-2`).
+     - `aws_compute.tf`: EC2 Aggregator Server + Bank 1 & Bank 2 instances with cloud-init Docker setup.
+     - `aws_storage.tf`: Encrypted S3 buckets (SSE-AES256) with least-privilege IAM roles and instance profiles.
+     - `aws_monitoring.tf`: Amazon CloudWatch log groups, metric filters, and consistency/latency alarms.
+     - `azure_compute.tf`: Azure Resource Group, Virtual Network (`vnet-bank-3`), NSG, and Linux VM for Bank 3.
+     - `azure_storage.tf`: Azure Storage Account and Blob Container (`bank3data`).
+     - `outputs.tf`: Emits public URLs, dashboard links, and bucket names.
+     - `README.md`: Complete deployment and cost manual (~$0.35 for a 2-hour evaluation demo).
+4. **Cloud Blueprints & Documentation**:
+   - `render.yaml`: Blueprint for 1-click cloud hosting on Render.com.
+   - `fly.toml`: Configuration for Fly.io deployment.
+   - `docs/CLOUD_DEPLOYMENT.md`: Comprehensive academic cloud report with architecture diagrams, cost breakdown, and viva presentation answers.
+
+**Test Suite Verification — 13/13 PASSED in 5.61s**:
+```
+tests/test_consistency_score.py .....     [ 38%]
+tests/test_service_api.py ........        [100%]
+=================== 13 passed in 5.61s ===================
+```
+
+---
+

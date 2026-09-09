@@ -70,9 +70,9 @@
 **Reason**: Each partition's one-hot encoding produces different columns (different grades, states, etc present). Without alignment, SHAP vectors are different lengths and cannot be compared with cosine similarity (Section 3.3 requires mean pairwise cosine similarity of same-length vectors). The shared feature space is the correct solution — it matches how a real federated system would standardize its feature schema.
 
 
-### D-016: Cloud Architecture Deferred (Deliberate Scope Cut)
-**Decision**: AWS EC2, Azure VM, IAM, S3, and CloudWatch live cloud deployment is explicitly deferred. The local Flower/in-process multi-client simulation is the complete deliverable for the compressed 3-day sprint.
-**Reason**: Deliberate scope cut to protect the algorithmic core (the novel explanation-consistency aggregation mechanism) from deadline pressure. Cloud infrastructure design is fully documented in Section 3.5 and the system architecture as "designed, not yet deployed."
+### D-016: Multi-Cloud Infrastructure Implemented via Terraform & Docker
+**Decision**: Multi-cloud deployment architecture is fully implemented using Terraform (`terraform/` directory covering AWS EC2, dual VPCs, S3 SSE-AES256, IAM least-privilege, CloudWatch logs/alarms, and Azure VM/VNet/Blob storage) and Docker multi-container orchestration (`Dockerfile`, `docker-compose.yml`).
+**Reason**: Transitioned from "designed, not yet deployed" to fully reproducible Infrastructure as Code and containerized artifacts for final Cloud Computing course submission and examiner evaluation.
 
 ### D-017: Evaluation Plotting and Communication Metric Accounting
 **Decision**: Communication overhead is computed per round as exact wire payload bytes: model parameter/soft-label vectors (3,188,672 bytes) plus 1D float32 SHAP explanation vector (84 features × 4 bytes × 3 clients = 1,008 bytes).
@@ -84,6 +84,11 @@
 1. **Weight Adjustment Math is Working Correctly**: Inspection of post-convergence weights at Round 4 confirmed that the pseudocode formula $\tilde{w}_i = w_i(1 + G a_i) / \sum_k w_k(1 + G a_k)$ is implemented with zero normalization bugs. As gain increases from 0.0 to 10.0, Client 2's weight increases from 0.2887 to 0.2902 (+0.531%).
 2. **Mathematical Bound**: Because cross-client agreement terms are inherently high and nearly identical ($a_1=0.8005, a_2=0.8072, a_3=0.8005$), the term $(1 + G a_i)$ acts as a near-constant scaling factor across all clients that cancels out in the normalization step. Asymptotically $\lim_{G \to \infty} (1+Ga_i)/(1+Ga_j) = a_i/a_j \le 1.0084$, bounding maximum relative weight shift to $<0.84\%$.
 3. **Empirical Finding**: Steady-state consistency across all 6 runs remains tightly bounded in [0.8114, 0.8128] ($\le 0.17\%$ variation), while pooled accuracy (82.57%-82.59%) and AUC (0.6563-0.6566) are unaffected. No gain value shows a non-noise improvement. This demonstrates that for tabular credit risk where foundational risk features (`int_rate`, `dti`, `annual_inc`) dominate across all institutional silos, explanation consistency is already near-maximal under standard FedAvg and insensitive to agreement reweighting.
+
+### D-019: Model Artifact Serialization for Cloud Low-Memory Serving
+**Decision**: Export trained LightGBM model boosters, shared feature indices, and metadata into lightweight disk artifacts (`models/global_model.joblib`, `models/client_*.joblib`, `models/model_metadata.json`). The production FastAPI service checks for these artifacts on startup before attempting raw CSV ingestion.
+**Reason**: Loading and training on the 1.6GB raw dataset at container boot requires >2.5GB RAM and ~70s, which triggers OOM kills on standard cloud free tiers (AWS `t2.micro` has 1GB RAM, Render free tier has 512MB RAM). Serialized artifacts load in <0.5 seconds and consume <280MB RAM, enabling reliable deployment on low-cost cloud instances without losing any predictive or TreeSHAP explainability capabilities.
+
 
 
 

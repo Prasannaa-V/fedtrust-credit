@@ -185,11 +185,67 @@ python src/run_experiment.py --variant ours --rounds 20 --consistency-gain 1.0
 python src/evaluation.py
 ```
 
+### 5. Running the Interactive Web Dashboard
+
+```bash
+# Launch FastAPI backend + Interactive Dashboard (<0.5s fast-boot)
+python run_service.py
+```
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) for real-time credit scoring, TreeSHAP attributions, and federated round simulations.
+
+---
+
+## ☁️ Cloud Architecture & Deployment (Course Deliverables)
+
+Designed and implemented for **Cloud Computing (BITE412L)** at VIT Vellore, matching Section 3.5 & 4.1:
+
+```mermaid
+flowchart LR
+    subgraph AWS us-east-1
+        A[Aggregator EC2<br/>FastAPI :8000<br/>Flower :8080]
+        B1[Bank 1 EC2<br/>VPC 10.1.0.0/16]
+        B2[Bank 2 EC2<br/>VPC 10.2.0.0/16]
+        CW[CloudWatch Alarms]
+    end
+    subgraph Azure East US
+        B3[Bank 3 VM<br/>VNet 10.3.0.0/16]
+    end
+
+    B1 --> A
+    B2 --> A
+    B3 --> A
+    A -.-> CW
+```
+
+### 1. Docker Multi-Node Simulation
+```bash
+# Run isolated multi-VPC topology locally
+docker-compose up -d
+```
+
+### 2. Multi-Cloud Terraform IaC (AWS + Azure)
+Complete production Infrastructure as Code located in [`terraform/`](terraform/):
+```bash
+cd terraform
+terraform init
+terraform plan
+terraform apply
+```
+Provisions:
+- **AWS**: Dual isolated VPCs (`vpc-bank-1`, `vpc-bank-2`), S3 SSE-AES256 buckets, IAM least-privilege roles, EC2 aggregator, CloudWatch monitoring & latency alarms.
+- **Microsoft Azure**: Virtual Network (`vnet-bank-3`), Linux VM for Bank 3, and private Azure Blob Storage.
+- See [`terraform/README.md`](terraform/README.md) for full deployment details and cost breakdown (~$0.35 per evaluation run).
+
+### 3. Public Cloud Hosting
+- **Render.com**: 1-click blueprint via [`render.yaml`](render.yaml).
+- **Fly.io**: 1-command deployment via [`fly.toml`](fly.toml).
+- See [`docs/CLOUD_DEPLOYMENT.md`](docs/CLOUD_DEPLOYMENT.md) for the complete cloud report, architecture details, and viva presentation speaking points.
+
 ---
 
 ## 📜 Patent Trail & Architectural Decision Records
 
-Every algorithmic design decision, math formulation, and hyperparameter justification is documented in [docs/DECISIONS.md](docs/DECISIONS.md) under formal ADRs (D-001 through D-018) for intellectual property and patent trail integrity.
+Every algorithmic design decision, math formulation, and hyperparameter justification is documented in [docs/DECISIONS.md](docs/DECISIONS.md) under formal ADRs (D-001 through D-019) for intellectual property and patent trail integrity.
 
 ---
 

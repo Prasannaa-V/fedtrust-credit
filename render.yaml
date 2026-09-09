@@ -1,0 +1,20 @@
+# ==============================================================================
+# FedTrust-Credit — Render.com Blueprint
+# 1-Click Free Cloud Web Service Deployment
+# ==============================================================================
+
+services:
+  - type: web
+    name: fedtrust-credit-dashboard
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: HOST
+        value: 0.0.0.0
+      - key: PYTHONUNBUFFERED
+        value: "1"

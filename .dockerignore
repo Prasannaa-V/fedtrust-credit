@@ -1,0 +1,24 @@
+# Ignore virtual environment and local dependencies
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+
+# Ignore large raw dataset (models/ holds serialized artifacts)
+data/
+*.csv
+*.parquet
+
+# Ignore git & temporary IDE files
+.git/
+.gitignore
+.DS_Store
+.idea/
+.vscode/
+scratch/
+terraform/
