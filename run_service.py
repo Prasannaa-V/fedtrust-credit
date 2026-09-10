@@ -5,6 +5,7 @@ Usage:
 """
 
 import argparse
+import os
 import sys
 from pathlib import Path
 import uvicorn
@@ -13,9 +14,12 @@ ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT / "src"))
 
 def main():
+    default_host = os.environ.get("HOST", "0.0.0.0")
+    default_port = int(os.environ.get("PORT", 8000))
+
     parser = argparse.ArgumentParser(description="Start FedTrust-Credit Service")
-    parser.add_argument("--host", default="127.0.0.1", help="Host interface (default: 127.0.0.1)")
-    parser.add_argument("--port", type=int, default=8000, help="Port to bind (default: 8000)")
+    parser.add_argument("--host", default=default_host, help=f"Host interface (default: {default_host})")
+    parser.add_argument("--port", type=int, default=default_port, help=f"Port to bind (default: {default_port})")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload on code change")
     args = parser.parse_args()
 
