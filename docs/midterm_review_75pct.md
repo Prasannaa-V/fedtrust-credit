@@ -125,15 +125,16 @@ Adding SHAP vectors (1,548 B/round per client) costs only **1.31% extra bandwidt
 
 ---
 
-## 6. AWS Cloud Infrastructure (All Live)
+## 6. Multi-Cloud Infrastructure (All Live)
 
 | Service | Role | Status |
 |---|---|---|
-| **EC2** (us-east-1) | Central aggregator + Docker host | ✅ Running |
-| **S3** `fedtrust-models` | Serialized LightGBM model registry | ✅ Uploaded |
-| **CloudWatch** `FedTrustCredit/FL` | DefaultProbability metric per prediction | ✅ Logging |
-| **SNS** `fedtrust-risk-alerts` | Email alert when default probability ≥ 35% | ✅ Firing |
-| **IAM** EC2 Instance Profile | Zero hardcoded credentials | ✅ Active |
+| **AWS EC2** (us-east-1) | Central aggregator + Bank 1 & 2 Docker host | ✅ Running |
+| **Azure VM** (East US) | Bank 3 Subprime client | ✅ Running |
+| **AWS S3** `fedtrust-models` | Serialized LightGBM model registry | ✅ Uploaded |
+| **AWS CloudWatch** | DefaultProbability metric per prediction | ✅ Logging |
+| **AWS SNS** | Email alert when default probability ≥ 35% | ✅ Firing |
+| **AWS IAM** | Zero hardcoded credentials | ✅ Active |
 
 ### 6.1 AWS S3 — Model Registry
 
@@ -252,21 +253,9 @@ tests/test_service_api.py ........        [100%]
 
 ## 9. Remaining 25% Implementation
 
-### 9.1 Azure Bank 3 — Live Cross-Cloud Deployment
 
-**What's done:** Terraform IaC for Azure VM and Blob Storage is fully written. The Bank 3 client currently runs inside `docker-compose` locally to simulate the Azure node.
 
-**What remains:**
-- Provision the Azure VM using `terraform apply` on `azure_compute.tf` and `azure_storage.tf`
-- Deploy the Bank 3 LightGBM client container on the Azure VM
-- Validate cross-cloud gRPC communication: Azure VM → AWS EC2 aggregator
-- Confirm Bank 3's SHAP vectors reach the aggregator over public internet with TLS
-
-**Why it matters:** Completing this turns the "simulated" multi-cloud architecture into a genuinely live, cross-provider federated system — the strongest demonstration of cloud computing course objectives.
-
----
-
-### 9.2 Amazon CloudWatch Monitoring Dashboard
+### 9.1 Amazon CloudWatch Monitoring Dashboard
 
 **What's done:** CloudWatch metric logging is live — every `/api/predict/risk` call logs `DefaultProbability` to the `FedTrustCredit/FL` namespace. Consistency drift alarms are defined in Terraform.
 
@@ -282,7 +271,7 @@ tests/test_service_api.py ........        [100%]
 
 ---
 
-### 9.3 Differential Privacy Analysis
+### 9.2 Differential Privacy Analysis
 
 **What's done:** The system currently achieves privacy through data non-sharing (weights-only communication).
 
@@ -296,7 +285,7 @@ tests/test_service_api.py ........        [100%]
 
 ---
 
-### 9.4 Adversarial Robustness — Byzantine Client Test
+### 9.3 Adversarial Robustness — Byzantine Client Test
 
 **What's done:** The aggregation currently trusts all clients equally (after consistency weighting).
 
@@ -310,7 +299,7 @@ tests/test_service_api.py ........        [100%]
 
 ---
 
-### 9.5 German Credit Dataset — Cross-Dataset Generalization
+### 9.4 German Credit Dataset — Cross-Dataset Generalization
 
 **What's done:** All benchmarks currently use the LendingClub dataset.
 
@@ -340,7 +329,6 @@ tests/test_service_api.py ........        [100%]
 
 | Task | Priority | Estimated Effort |
 |---|---|---|
-| Azure VM live deployment | High | 3–4 hours |
 | CloudWatch visual dashboard | Medium | 1–2 hours |
 | Differential privacy (ε-DP) | High | 4–5 hours |
 | Byzantine robustness test | High | 3–4 hours |
