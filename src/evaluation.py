@@ -107,9 +107,9 @@ def generate_all_plots(
     )
     ax.set_xlabel("Federated Round", fontweight="bold")
     ax.set_ylabel("Explanation-Consistency Score (Mean Cosine Sim)", fontweight="bold")
-    ax.set_title("Explanation Consistency Across Rounds (Section 4.3)", fontsize=13, fontweight="bold", pad=12)
+    ax.set_title("Explanation Consistency Across Federated Rounds", fontsize=13, fontweight="bold", pad=12)
     ax.set_xticks(range(2, 21, 2))
-    ax.set_ylim(0.70, 0.86)
+    ax.set_ylim(0.80, 1.0)
     ax.legend(frameon=True, facecolor="white", edgecolor="#ccc", loc="lower right")
     plt.tight_layout()
     plot1_path = out_dir / "consistency_comparison.png"
@@ -149,9 +149,9 @@ def generate_all_plots(
     )
     ax.set_xlabel("Federated Round", fontweight="bold")
     ax.set_ylabel("Pooled Accuracy", fontweight="bold")
-    ax.set_title("Pooled Accuracy Across Federated Rounds (Section 4.3)", fontsize=13, fontweight="bold", pad=12)
+    ax.set_title("Pooled Accuracy Across Federated Rounds", fontsize=13, fontweight="bold", pad=12)
     ax.set_xticks(range(2, 21, 2))
-    ax.set_ylim(0.818, 0.832)
+    ax.set_ylim(0.840, 0.870)
     ax.legend(frameon=True, facecolor="white", edgecolor="#ccc", loc="upper right")
     plt.tight_layout()
     plot2_path = out_dir / "accuracy_comparison.png"
@@ -191,7 +191,7 @@ def generate_all_plots(
     )
     ax.set_xlabel("Federated Round", fontweight="bold")
     ax.set_ylabel("Pooled AUC-ROC", fontweight="bold")
-    ax.set_title("Pooled AUC-ROC Across Federated Rounds (Section 4.3)", fontsize=13, fontweight="bold", pad=12)
+    ax.set_title("Pooled AUC-ROC Across Federated Rounds", fontsize=13, fontweight="bold", pad=12)
     ax.set_xticks(range(2, 21, 2))
     ax.legend(frameon=True, facecolor="white", edgecolor="#ccc", loc="center right")
     plt.tight_layout()
@@ -221,7 +221,7 @@ def generate_all_plots(
     rects3 = ax.bar(x + width, f1_cent, width, label="Centralized", color="#2ca02c", alpha=0.9)
 
     ax.set_ylabel("F1 Score (Default Class)", fontweight="bold")
-    ax.set_title("Per-Client F1 Score by Institution Partition (Section 4.3)", fontsize=13, fontweight="bold", pad=12)
+    ax.set_title("Per-Client F1 Score by Institution Partition", fontsize=13, fontweight="bold", pad=12)
     ax.set_xticks(x)
     ax.set_xticklabels(clients, fontweight="bold")
     ax.legend(frameon=True, facecolor="white", edgecolor="#ccc")
@@ -265,7 +265,7 @@ def generate_all_plots(
     p2 = ax.bar(variants, shap_mb, width=0.45, bottom=weights_mb, label="SHAP Attribution Vector (0.984 KB)", color="#d73027")
 
     ax.set_ylabel("Per-Round Payload (MB)", fontweight="bold")
-    ax.set_title("Per-Round Communication Overhead (Section 4.3)", fontsize=13, fontweight="bold", pad=12)
+    ax.set_title("Per-Round Communication Overhead", fontsize=13, fontweight="bold", pad=12)
     ax.set_ylim(0, 3.8)
     ax.legend(frameon=True, facecolor="white", edgecolor="#ccc", loc="upper left")
 
@@ -318,7 +318,7 @@ def generate_all_plots(
     r2 = ax.bar(x + width / 2, f1_spreads, width, label="F1 Spread (Max - Min %)", color="#e6550d")
 
     ax.set_ylabel("Institutional Disparity Spread (%)", fontweight="bold")
-    ax.set_title("Institutional Fairness Spread Across Clients (Section 4.3)", fontsize=13, fontweight="bold", pad=12)
+    ax.set_title("Institutional Fairness Spread Across Clients", fontsize=13, fontweight="bold", pad=12)
     ax.set_xticks(x)
     ax.set_xticklabels(v_labels, fontweight="bold")
     ax.set_ylim(0, 40)
