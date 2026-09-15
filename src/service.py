@@ -44,7 +44,14 @@ if str(SRC_DIR) not in sys.path:
 from consistency_score import _cosine_similarity, explanation_consistency_score, per_client_agreement
 from aggregation_strategy import explanation_consistency_aware_aggregate
 from data_partition import load_and_clean, partition_noniid, prepare_features, get_client_splits, build_shared_feature_columns
-from aws_integrations import cloud_manager
+try:
+    from aws_integrations import cloud_manager
+    _AWS_MODULE_OK = True
+except Exception as _aws_import_err:
+    cloud_manager = None
+    _AWS_MODULE_OK = False
+    print(f"[service] WARNING: aws_integrations import failed: {_aws_import_err}")
+    print("[service] AWS endpoints will return status info instead of 404.")
 
 app = FastAPI(
     title="FedTrust-Credit Service",
@@ -513,9 +520,25 @@ def predict_credit_risk(applicant: LoanApplicantRequest):
 
 # ── AWS Cloud Integrations Endpoints ──────────────────────────────────────────
 
+def _aws_unavailable(detail: str):
+    """Standard response when aws_integrations module failed to import."""
+    return {
+        "status": "unavailable",
+        "reason": detail,
+        "fix": "Run: pip install boto3 inside the container, then restart.",
+        "boto3_installed": False,
+    }
+
 @app.get("/api/aws/status")
 def get_aws_status():
     """Returns the live status of all integrated AWS cloud services."""
+    if not _AWS_MODULE_OK or cloud_manager is None:
+        return _aws_unavailable(
+            "aws_integrations module could not be loaded. "
+            "boto3 is likely missing from the Docker image "
+            "(build failed due to disk space). "
+            "Free disk space on EC2 and rebuild: sudo docker system prune -af && sudo docker build -t fedtrust-credit ."
+        )
     return cloud_manager.get_cloud_status()
 
 class S3UploadRequest(BaseModel):
@@ -524,6 +547,8 @@ class S3UploadRequest(BaseModel):
 @app.post("/api/aws/s3/upload")
 def upload_models_s3(req: S3UploadRequest):
     """Uploads serialized models and publication plots to Amazon S3 bucket."""
+    if not _AWS_MODULE_OK or cloud_manager is None:
+        return _aws_unavailable("boto3 not installed in container image.")
     return cloud_manager.upload_models_to_s3(bucket_name=req.bucket_name or None)
 
 
