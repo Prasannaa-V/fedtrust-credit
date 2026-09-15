@@ -32,6 +32,14 @@ Three bank clients, each in an isolated cloud network (AWS VPC or Azure VNet), t
 - Bank 3 (Grades E–G) in `vnet-bank-3` on Azure VM (multi-cloud isolation)
 - Central Aggregator on AWS EC2 `us-east-1` with 4 native AWS services
 
+> **📸 SCREENSHOT PLACEHOLDER — AWS EC2 Console**
+> Replace this block with a screenshot of: **AWS Console → EC2 → Instances** showing the running `fedtrust-dashboard` instance with Public IP, Instance State = Running, and Region `us-east-1`.
+> *(Filename suggestion: `aws_ec2_instance.png`)*
+
+> **📸 SCREENSHOT PLACEHOLDER — AWS VPC Dashboard**
+> Replace this block with a screenshot of: **AWS Console → VPC → Your VPCs** showing the isolated VPCs (`vpc-bank-1`, `vpc-bank-2`, and the Aggregator VPC).
+> *(Filename suggestion: `aws_vpc_dashboard.png`)*
+
 ---
 
 ## 3. Novel Contribution — Aggregation Algorithm
@@ -131,7 +139,29 @@ Adding SHAP vectors (1,548 B/round per client) costs only **1.31% extra bandwidt
 | **SNS** `fedtrust-risk-alerts` | Email alert when default probability ≥ 35% | ✅ Firing |
 | **IAM** EC2 Instance Profile | Zero hardcoded credentials | ✅ Active |
 
-### Cloud Boot Optimization
+### 6.1 AWS S3 — Model Registry
+
+> **📸 SCREENSHOT PLACEHOLDER — AWS S3 Bucket**
+> Replace this block with a screenshot of: **AWS Console → S3 → fedtrust-models → Objects** showing the uploaded model files (e.g. `models/client_1.txt`, `models/client_2.txt`, etc.).
+> *(Filename suggestion: `aws_s3_bucket.png`)*
+
+### 6.2 AWS CloudWatch — Telemetry
+
+> **📸 SCREENSHOT PLACEHOLDER — AWS CloudWatch Metrics**
+> Replace this block with a screenshot of: **AWS Console → CloudWatch → Metrics → FedTrustCredit/FL → DefaultProbability** showing the time-series metric graph with data points from your API calls.
+> *(Filename suggestion: `aws_cloudwatch_metrics.png`)*
+
+### 6.3 AWS SNS — High-Risk Email Alert
+
+> **📸 SCREENSHOT PLACEHOLDER — SNS Email Alert Received**
+> Replace this block with a screenshot of: the email you received in your inbox from `no-reply@sns.amazonaws.com` with the high-risk borrower alert details.
+> *(Filename suggestion: `aws_sns_email_alert.png`)*
+
+> **📸 SCREENSHOT PLACEHOLDER — AWS SNS Topic Console**
+> Replace this block with a screenshot of: **AWS Console → SNS → Topics → fedtrust-risk-alerts** showing the topic ARN, subscriptions, and message count.
+> *(Filename suggestion: `aws_sns_topic.png`)*
+
+### 6.4 Cloud Boot Optimization
 
 | Metric | Before Serialization | After |
 |---|---|---|
@@ -141,7 +171,7 @@ Adding SHAP vectors (1,548 B/round per client) costs only **1.31% extra bandwidt
 
 Serializing pre-trained LightGBM models to disk eliminated the 1.6 GB CSV reload on every container startup, enabling deployment on AWS `t2.micro` (1 GB RAM).
 
-### Multi-Cloud Terraform IaC
+### 6.5 Multi-Cloud Terraform IaC
 
 | Terraform File | Provisions |
 |---|---|
@@ -151,6 +181,10 @@ Serializing pre-trained LightGBM models to disk eliminated the 1.6 GB CSV reload
 | `aws_monitoring.tf` | CloudWatch log groups, consistency drift alarms |
 | `azure_compute.tf` | Azure Resource Group, VNet, NSG, Linux VM (Bank 3) |
 | `azure_storage.tf` | Azure Blob Storage container `bank3data` |
+
+> **📸 SCREENSHOT PLACEHOLDER — Azure Portal (Bank 3 VNet)**
+> Replace this block with a screenshot of: **Azure Portal → Virtual Networks → vnet-fedtrust-bank3** showing the resource group, region (East US), and address space — demonstrating the multi-cloud isolation for Bank 3.
+> *(Filename suggestion: `azure_vnet_bank3.png`)*
 
 ---
 
@@ -166,6 +200,14 @@ Base: `http://<EC2-IP>:8000` | Docs: `.../docs`
 | `POST /api/predict/risk` | Credit scoring + SHAP + 3-bank consensus |
 | `GET /api/aws/status` | Live AWS service health |
 | `POST /api/aws/s3/upload` | Upload models to S3 |
+
+> **📸 SCREENSHOT PLACEHOLDER — FastAPI Swagger Docs**
+> Replace this block with a screenshot of: `http://<EC2-IP>:8000/docs` showing the interactive Swagger UI with all API endpoints listed.
+> *(Filename suggestion: `fastapi_swagger_docs.png`)*
+
+> **📸 SCREENSHOT PLACEHOLDER — AWS Status API Response**
+> Replace this block with a screenshot of: your terminal running `curl -s http://localhost:8000/api/aws/status | python3 -m json.tool` showing the full JSON response with all 5 services active.
+> *(Filename suggestion: `aws_status_api_response.png`)*
 
 **Real prediction output:**
 ```json
