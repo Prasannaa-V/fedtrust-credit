@@ -9,7 +9,7 @@ set -e
 
 CONTAINER_NAME="fedtrust-dashboard"
 IMAGE_NAME="fedtrust-credit"
-S3_BUCKET="${FEDTRUST_S3_BUCKET:-fedtrust-models-prasannaa}"
+S3_BUCKET="${FEDTRUST_S3_BUCKET:-fedtrust-models}"
 SNS_ARN="${1:-${FEDTRUST_SNS_TOPIC_ARN:-}}"
 REGION="${AWS_DEFAULT_REGION:-us-east-1}"
 
