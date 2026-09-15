@@ -11,6 +11,7 @@ Integrates 4 native AWS Cloud Services with the FastAPI Risk Engine:
 
 import os
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -169,13 +170,13 @@ class AWSCloudManager:
                         "MetricName": metric_name,
                         "Value": float(value),
                         "Unit": unit,
-                        "Timestamp": time.time(),
+                        "Timestamp": datetime.now(timezone.utc),  # CloudWatch requires datetime, not Unix float
                     }
                 ],
             )
+            print(f"[AWSCloudManager] CloudWatch metric sent: {metric_name}={value} ({unit})")
         except Exception as e:
-            # Silent fallback to avoid impacting user request flow
-            pass
+            print(f"[AWSCloudManager] CloudWatch put_metric_data failed: {e}")
 
 
 # Singleton instance
