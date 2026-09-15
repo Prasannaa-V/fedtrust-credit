@@ -16,83 +16,43 @@
 
 Financial institutions cannot share raw customer data due to privacy regulations (GDPR, Fair Lending, CCPA), yet an isolated bank's model suffers from distributional bias and poor generalization.
 
-**FedTrust-Credit** addresses this with a **Federated Learning** framework in which three simulated banks — each operating in a private cloud VPC — collaboratively train a credit risk model without ever sharing raw loan records. Our **novel contribution** is the **Explanation-Consistency-Aware Aggregation** mechanism: rather than aggregating model weights uniformly (FedAvg), the central aggregator additionally collects each client's TreeSHAP explanation vectors and re-weights contributions based on pairwise Spearman explanation agreement. This ensures the global model behaves interpretably and consistently across institutions — a prerequisite for regulatory compliance.
+**FedTrust-Credit** addresses this with a **Federated Learning** framework in which three simulated banks — each operating in a private cloud VPC — collaboratively train a credit risk model without ever sharing raw loan records. Our **novel contribution** is the **Explanation-Consistency-Aware Aggregation** mechanism: rather than aggregating model weights uniformly (FedAvg), the central aggregator additionally collects each client's TreeSHAP explanation vectors and re-weights contributions based on pairwise Spearman explanation agreement.
 
 ---
 
-## 2. Implementation Status
+## 2. System Architecture
 
-| Module | Status | Notes |
-|---|---|---|
-| Non-IID data partitioning (3 banks) | ✅ Complete | By loan grade, region, time period |
-| Local LightGBM training per client | ✅ Complete | Real Lending Club data (1.34M rows) |
-| FedAvg baseline | ✅ Complete | 20-round benchmark |
-| Explanation-Consistency-Aware Aggregation | ✅ Complete | Spearman-weighted FedAvg |
-| TreeSHAP explainability per client | ✅ Complete | Per-round SHAP vectors |
-| 20-round federated benchmark | ✅ Complete | Full metrics logged |
-| Centralized baseline (upper bound) | ✅ Complete | Pooled training reference |
-| Model serialization (fast cloud boot) | ✅ Complete | 68s → 0.45s boot time |
-| FastAPI REST service | ✅ Complete | `/api/predict/risk`, `/api/metrics/*` |
-| Docker containerization | ✅ Complete | <400MB image, healthcheck |
-| AWS EC2 deployment | ✅ Complete | Live on `us-east-1` |
-| **AWS S3** — model registry | ✅ Complete | `fedtrust-models` bucket |
-| **AWS CloudWatch** — telemetry | ✅ Complete | `FedTrustCredit/FL` namespace |
-| **AWS SNS** — high-risk email alerts | ✅ Complete | Email fires on risk >= 35% |
-| **AWS IAM** — instance profile | ✅ Complete | Zero hardcoded credentials |
-| Multi-cloud Terraform IaC | ✅ Complete | AWS + Azure, modular |
-| GitHub repository | ✅ Complete | Private, all code committed |
-| Automated test suite | ✅ Complete | 13/13 tests pass in 5.6s |
+![FedTrust-Credit Multi-Cloud Architecture](/home/prasannaa/.gemini/antigravity-ide/brain/1c6f13bb-6eba-44ea-ba57-6832f0f41f5e/fedtrust_architecture_1789489576196.jpg)
+
+Three bank clients, each in an isolated cloud network (AWS VPC or Azure VNet), train locally on private partitions of the Lending Club dataset. They share **only model weights and SHAP explanation vectors** — never raw data — with the central aggregator on AWS EC2. The aggregator scores explanation alignment across clients and adjusts contribution weights accordingly before broadcasting the updated global model back to all banks.
+
+**Key architectural boundaries:**
+- Bank 1 (Grades A–B) in `vpc-bank-1` on AWS EC2
+- Bank 2 (Grades C–D) in `vpc-bank-2` on AWS EC2
+- Bank 3 (Grades E–G) in `vnet-bank-3` on Azure VM (multi-cloud isolation)
+- Central Aggregator on AWS EC2 `us-east-1` with 4 native AWS services
 
 ---
 
-## 3. System Architecture
+## 3. Novel Contribution — Aggregation Algorithm
 
-Three bank clients, each in an isolated cloud network, train locally on private partitions of the Lending Club dataset. They share only model weights and SHAP explanation vectors with the central aggregator. The aggregator scores explanation alignment across clients and adjusts contribution weights accordingly before broadcasting the updated global model.
+![Explanation-Consistency-Aware Aggregation Algorithm](/home/prasannaa/.gemini/antigravity-ide/brain/1c6f13bb-6eba-44ea-ba57-6832f0f41f5e/aggregation_algorithm_1789489590242.jpg)
+
+Standard FedAvg aggregates weights proportional to local dataset size only. Our method additionally incorporates **explanation consistency** as an aggregation signal:
 
 ```
-  Bank 1 (AWS VPC vpc-bank-1)   Bank 2 (AWS VPC vpc-bank-2)   Bank 3 (Azure VNet)
-  Grades A-B / Low-risk          Grades C-D / Mid-risk          Grades E-G / Subprime
-         |                              |                              |
-         |—— weights + SHAP vector ——————|—— weights + SHAP vector ——————|
-         v                              v                              v
-  +——————————————————————————————————————————————————————————————————————+
-  |        Central Aggregator (AWS EC2, us-east-1)                      |
-  |  1. Collect weights W1, W2, W3 from all clients                     |
-  |  2. Collect SHAP vectors phi1, phi2, phi3                           |
-  |  3. Score pairwise Spearman consistency: CS(phi_i, phi_j)           |
-  |  4. Compute per-client aggregation weights alpha_i from CS scores   |
-  |  5. W_global = sum(alpha_i x W_i)  [Consistency-Aware FedAvg]      |
-  |  6. Broadcast W_global to all clients                               |
-  +——————————————————————————————————————————————————————————————————————+
-         |                   |                   |
-    AWS S3           CloudWatch (metrics)    SNS (high-risk alerts)
+CS(i,j)  = SpearmanCorr(|φ_i|, |φ_j|)         # pairwise SHAP consistency
+score(i) = mean(CS(i,j)) for all j ≠ i          # per-client consensus
+gain(i)  = 1 + λ × (score(i) − score_mean)      # consistency gain factor
+α(i)     = (n_i × gain(i)) / Σ(n_j × gain(j))  # normalized weight
+W_global = Σ α(i) × W_i                          # consistency-aware FedAvg
 ```
+
+Clients whose SHAP explanations agree more with the global consensus receive proportionally **higher weight** — directly incentivizing explainability alignment across non-IID distributions without any raw data sharing.
 
 ---
 
-## 4. Novel Contribution — Aggregation Algorithm
-
-Standard FedAvg aggregates model weights proportional to local dataset size:
-
-```
-W_global = sum( (n_i / N) x W_i )
-```
-
-Our **Explanation-Consistency-Aware** variant adjusts each client's contribution using their SHAP vector's Spearman alignment with other clients:
-
-```
-CS(i, j)  = SpearmanCorr(|phi_i|, |phi_j|)        # pairwise explanation consistency
-score(i)  = mean(CS(i, j)) for all j != i           # per-client consensus score
-gain(i)   = 1 + lambda x (score(i) - score_mean)    # consistency gain factor
-alpha(i)  = (n_i x gain(i)) / sum(n_j x gain(j))    # normalized aggregation weight
-W_global  = sum( alpha(i) x W_i )
-```
-
-Clients whose SHAP explanations agree more with the global consensus receive proportionally higher weight — directly incentivizing explainability alignment without any raw data sharing.
-
----
-
-## 5. Dataset and Partitioning
+## 4. Dataset & Non-IID Partitioning
 
 | Property | Value |
 |---|---|
@@ -100,23 +60,27 @@ Clients whose SHAP explanations agree more with the global consensus receive pro
 | Raw rows | ~2.26M records |
 | After cleaning | 1,344,976 rows |
 | Target | `loan_status` → binary (Fully Paid = 0, Default = 1) |
-| Features | 26 engineered features (rate, DTI, grade, employment, utilization, etc.) |
+| Features | 26 engineered features |
 
-**Non-IID Partitioning by Loan Grade:**
+**Non-IID Partitioning by Loan Grade (simulating real bank populations):**
 
 | Client | Grade Range | Profile | Default Rate |
 |---|---|---|---|
-| Bank 1 (Client 1) | A–B | Prime / Low-risk | ~8% |
-| Bank 2 (Client 2) | C–D | Standard / Mid-risk | ~17% |
-| Bank 3 (Client 3) | E–G | Subprime / High-risk | ~32% |
-
-This creates genuine non-IID conditions: each client's local model sees a systematically different population, causing explanation drift between banks — which our method corrects.
+| Bank 1 | A–B | Prime / Low-risk | ~8% |
+| Bank 2 | C–D | Standard / Mid-risk | ~17% |
+| Bank 3 | E–G | Subprime / High-risk | ~32% |
 
 ---
 
-## 6. Benchmark Results (20 Federated Rounds)
+## 5. Benchmark Results (20 Federated Rounds)
 
-### 6.1 Pooled Accuracy
+### 5.1 Accuracy & AUC Comparison
+
+````carousel
+![Accuracy Comparison — FedAvg vs Ours vs Centralized](/home/prasannaa/.gemini/antigravity-ide/brain/1c6f13bb-6eba-44ea-ba57-6832f0f41f5e/accuracy_comparison.png)
+<!-- slide -->
+![AUC-ROC Comparison](/home/prasannaa/.gemini/antigravity-ide/brain/1c6f13bb-6eba-44ea-ba57-6832f0f41f5e/auc_comparison.png)
+````
 
 | Method | Accuracy | AUC-ROC | F1 |
 |---|---|---|---|
@@ -124,101 +88,91 @@ This creates genuine non-IID conditions: each client's local model sees a system
 | FedTrust-Credit (Ours) | **85.34%** | **0.6574** | 0.0665 |
 | FedAvg (baseline) | 85.28% | 0.6554 | 0.0661 |
 
-Our method outperforms FedAvg on accuracy (+0.06%) and AUC-ROC (+0.002) while preserving full data privacy.
+Our method outperforms FedAvg on both accuracy (+0.06%) and AUC-ROC (+0.002) while preserving full data privacy.
 
-### 6.2 Per-Client Accuracy
+### 5.2 Explanation Consistency & Fairness
 
-| Client | FedAvg | Ours | Centralized |
-|---|---|---|---|
-| Client 1 (Bank A–B) | 90.65% | **90.68%** | 90.75% |
-| Client 2 (Bank C–D) | 78.97% | **79.03%** | 79.37% |
-| Client 3 (Bank E–G) | 76.30% | **76.49%** | 77.40% |
+````carousel
+![Explanation Consistency Score — Round-by-Round](/home/prasannaa/.gemini/antigravity-ide/brain/1c6f13bb-6eba-44ea-ba57-6832f0f41f5e/consistency_comparison.png)
+<!-- slide -->
+![Fairness Spread Across Clients](/home/prasannaa/.gemini/antigravity-ide/brain/1c6f13bb-6eba-44ea-ba57-6832f0f41f5e/fairness_spread.png)
+<!-- slide -->
+![Per-Client F1 Score](/home/prasannaa/.gemini/antigravity-ide/brain/1c6f13bb-6eba-44ea-ba57-6832f0f41f5e/per_client_f1.png)
+````
 
-All three clients improve under our method vs. FedAvg.
-
-### 6.3 Communication Overhead
-
-| Method | Bytes/Round | Overhead vs FedAvg |
-|---|---|---|
-| FedAvg | 118,324 B | baseline |
-| Ours | 119,872 B | **+1.31%** |
-
-Adding SHAP vectors (1,548 B/round) costs only **1.31% extra bandwidth** — negligible in real networks.
-
-### 6.4 Fairness (Accuracy Spread Across Clients)
-
-| Method | Accuracy Spread | F1 Spread |
+| Method | Accuracy Spread (↓ better) | F1 Spread |
 |---|---|---|
 | FedAvg | 0.1436 | 0.1165 |
 | Ours | **0.1418** | 0.1260 |
 | Centralized | 0.1334 | 0.0894 |
 
-Our method reduces accuracy disparity across banks vs. FedAvg — a fairer outcome for smaller/minority-population banks.
+Our method reduces accuracy disparity across banks vs. FedAvg — fairer outcomes for minority-population clients.
+
+### 5.3 Communication Overhead
+
+![Communication Overhead — FedAvg vs Ours](/home/prasannaa/.gemini/antigravity-ide/brain/1c6f13bb-6eba-44ea-ba57-6832f0f41f5e/communication_overhead.png)
+
+| Method | Bytes/Round | Extra Cost |
+|---|---|---|
+| FedAvg | 118,324 B | baseline |
+| Ours | 119,872 B | **+1.31%** only |
+
+Adding SHAP vectors (1,548 B/round per client) costs only **1.31% extra bandwidth** — negligible in production networks.
 
 ---
 
-## 7. Cloud Infrastructure Deployed
-
-### 7.1 AWS Services (All Live and Verified)
+## 6. AWS Cloud Infrastructure (All Live)
 
 | Service | Role | Status |
 |---|---|---|
-| **EC2** (us-east-1) | Central aggregator, Docker host for FastAPI service | ✅ Running |
-| **S3** `fedtrust-models` | Model registry — stores serialized LightGBM + SHAP artifacts | ✅ Uploaded |
-| **CloudWatch** `FedTrustCredit/FL` | Real-time telemetry: DefaultProbability metric per prediction | ✅ Logging |
-| **SNS** `fedtrust-risk-alerts` | Email alert when borrower default probability >= 35% | ✅ Firing |
-| **IAM** EC2 Instance Profile | Zero hardcoded credentials; role-based least-privilege access | ✅ Active |
+| **EC2** (us-east-1) | Central aggregator + Docker host | ✅ Running |
+| **S3** `fedtrust-models` | Serialized LightGBM model registry | ✅ Uploaded |
+| **CloudWatch** `FedTrustCredit/FL` | DefaultProbability metric per prediction | ✅ Logging |
+| **SNS** `fedtrust-risk-alerts` | Email alert when default probability ≥ 35% | ✅ Firing |
+| **IAM** EC2 Instance Profile | Zero hardcoded credentials | ✅ Active |
 
-### 7.2 Cloud Boot Optimization (Model Serialization)
+### Cloud Boot Optimization
 
-Before serialization, the service loaded the 1.6 GB raw CSV on every startup:
-
-| Metric | Before | After |
+| Metric | Before Serialization | After |
 |---|---|---|
 | Cold boot time | 68.3 s | **0.45 s** |
 | RAM footprint | ~2.5 GB | **<280 MB** |
 | Test suite time | 64.85 s | **5.61 s** |
 
-This made deployment on AWS `t2.micro` (1 GB RAM) feasible.
+Serializing pre-trained LightGBM models to disk eliminated the 1.6 GB CSV reload on every container startup, enabling deployment on AWS `t2.micro` (1 GB RAM).
 
-### 7.3 Multi-Cloud Terraform IaC
+### Multi-Cloud Terraform IaC
 
-Modular Terraform configs in `terraform/`:
-
-| File | What it provisions |
+| Terraform File | Provisions |
 |---|---|
-| `aws_vpc.tf` | Aggregator VPC + isolated Bank 1 VPC + Bank 2 VPC |
+| `aws_vpc.tf` | Aggregator VPC + Bank 1 VPC + Bank 2 VPC |
 | `aws_compute.tf` | EC2 Aggregator + Bank 1 + Bank 2 with Docker cloud-init |
-| `aws_storage.tf` | Encrypted S3 buckets (SSE-AES256), IAM roles, instance profiles |
-| `aws_monitoring.tf` | CloudWatch log groups, consistency drift alarms, latency alarms |
-| `azure_compute.tf` | Azure Resource Group, VNet (`vnet-bank-3`), NSG, Linux VM (Bank 3) |
-| `azure_storage.tf` | Azure Blob Storage container (`bank3data`) |
-| `outputs.tf` | EC2 IPs, dashboard URLs, bucket names |
+| `aws_storage.tf` | Encrypted S3 (SSE-AES256), IAM roles, instance profiles |
+| `aws_monitoring.tf` | CloudWatch log groups, consistency drift alarms |
+| `azure_compute.tf` | Azure Resource Group, VNet, NSG, Linux VM (Bank 3) |
+| `azure_storage.tf` | Azure Blob Storage container `bank3data` |
 
 ---
 
-## 8. Live REST API Endpoints
+## 7. Live REST API
 
-Base URL: `http://<EC2-Public-IP>:8000` | API Docs: `.../docs`
+Base: `http://<EC2-IP>:8000` | Docs: `.../docs`
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | `/health` | Container health check |
-| GET | `/api/metrics/summary` | Full benchmark results (all 3 methods) |
-| GET | `/api/metrics/rounds` | Round-by-round training trajectory |
-| GET | `/api/metrics/partitions` | Non-IID partition statistics |
-| POST | `/api/federated/simulate-round` | Live aggregation math demonstration |
-| POST | `/api/predict/risk` | Credit risk scoring + SHAP + 3-bank consensus |
-| GET | `/api/aws/status` | Live AWS service health |
-| POST | `/api/aws/s3/upload` | Upload models to S3 |
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/metrics/summary` | Full benchmark results |
+| `GET /api/metrics/rounds` | Round-by-round trajectory |
+| `POST /api/federated/simulate-round` | Live aggregation math |
+| `POST /api/predict/risk` | Credit scoring + SHAP + 3-bank consensus |
+| `GET /api/aws/status` | Live AWS service health |
+| `POST /api/aws/s3/upload` | Upload models to S3 |
 
-**Sample prediction response (real output):**
-
+**Real prediction output:**
 ```json
 {
   "default_probability_pct": 39.16,
   "risk_tier": "High (Subprime)",
-  "decision": "Decline Recommended (High Default Risk)",
+  "decision": "Decline Recommended",
   "explanation_consistency": 0.8318,
   "feature_attributions": [
     {"feature": "int_rate", "shap_value": 0.600, "impact": "Increases Risk"},
@@ -232,9 +186,23 @@ Base URL: `http://<EC2-Public-IP>:8000` | API Docs: `.../docs`
 }
 ```
 
+**AWS Status response (live):**
+```json
+{
+  "aws_connected": true,
+  "region": "us-east-1",
+  "services": {
+    "s3":         { "status": "configured", "bucket_name": "fedtrust-models" },
+    "cloudwatch": { "status": "active",     "namespace": "FedTrustCredit/FL" },
+    "sns":        { "status": "configured", "topic_arn": "arn:aws:sns:us-east-1:..." },
+    "iam":        { "status": "active",     "policy": "Least-privilege role-based access" }
+  }
+}
+```
+
 ---
 
-## 9. Test Suite
+## 8. Test Suite
 
 ```
 tests/test_consistency_score.py .....     [ 38%]
@@ -242,35 +210,120 @@ tests/test_service_api.py ........        [100%]
 =================== 13 passed in 5.61s ===================
 ```
 
-Tests cover: consistency score, cosine similarity, per-client agreement, all API routes, health check, prediction format, and metrics endpoints.
+---
+
+## 9. Remaining 25% Implementation
+
+### 9.1 Azure Bank 3 — Live Cross-Cloud Deployment
+
+**What's done:** Terraform IaC for Azure VM and Blob Storage is fully written. The Bank 3 client currently runs inside `docker-compose` locally to simulate the Azure node.
+
+**What remains:**
+- Provision the Azure VM using `terraform apply` on `azure_compute.tf` and `azure_storage.tf`
+- Deploy the Bank 3 LightGBM client container on the Azure VM
+- Validate cross-cloud gRPC communication: Azure VM → AWS EC2 aggregator
+- Confirm Bank 3's SHAP vectors reach the aggregator over public internet with TLS
+
+**Why it matters:** Completing this turns the "simulated" multi-cloud architecture into a genuinely live, cross-provider federated system — the strongest demonstration of cloud computing course objectives.
 
 ---
 
-## 10. Remaining Work (25%)
+### 9.2 Amazon CloudWatch Monitoring Dashboard
 
-| Task | Description |
-|---|---|
-| Azure VM (Bank 3) live deployment | Currently simulated via docker-compose; Terraform IaC is ready |
-| CloudWatch visual dashboard | Build monitoring dashboard panel for demo |
-| Final academic report | Full methodology, results tables, camera-ready figures |
-| Conference-quality plots | ROC curves, consistency trajectory, gain sweep results |
-| Viva / presentation preparation | Live demo script and Q&A preparation |
+**What's done:** CloudWatch metric logging is live — every `/api/predict/risk` call logs `DefaultProbability` to the `FedTrustCredit/FL` namespace. Consistency drift alarms are defined in Terraform.
+
+**What remains:**
+- Build a CloudWatch Dashboard with widgets:
+  - `DefaultProbability` time-series (per prediction over time)
+  - `ConsistencyScore` per federated round
+  - API latency histogram
+  - Alarm state panel (consistency drift + latency high)
+- Screenshot and embed dashboard in final report
+
+**Why it matters:** Visual proof that real-time cloud monitoring is working, not just API calls.
 
 ---
 
-## 11. Key Design Decisions
+### 9.3 Differential Privacy Analysis
+
+**What's done:** The system currently achieves privacy through data non-sharing (weights-only communication).
+
+**What remains:**
+- Measure and report **gradient sensitivity** (L2-norm of weight updates per round)
+- Add Gaussian noise calibration to weight updates (ε-differential privacy with configurable ε)
+- Plot: privacy budget ε vs. accuracy degradation curve
+- Document the formal privacy guarantee in the final report
+
+**Why it matters:** Formal DP gives a mathematically provable privacy bound — essential for regulatory compliance claims and conference-level paper quality.
+
+---
+
+### 9.4 Adversarial Robustness — Byzantine Client Test
+
+**What's done:** The aggregation currently trusts all clients equally (after consistency weighting).
+
+**What remains:**
+- Simulate a **Byzantine (malicious) client**: inject one poisoned client that flips labels locally before training
+- Observe how explanation consistency scores detect the poisoned client (its SHAP vector will diverge)
+- Show that our consistency-aware weighting **automatically down-weights** the malicious client
+- Compare with FedAvg (which has no defense) — FedAvg's accuracy should drop, ours should hold
+
+**Why it matters:** This is a major selling point for the paper — our aggregation naturally provides Byzantine resilience as a by-product of consistency scoring.
+
+---
+
+### 9.5 German Credit Dataset — Cross-Dataset Generalization
+
+**What's done:** All benchmarks currently use the LendingClub dataset.
+
+**What remains:**
+- Partition the UCI German Credit dataset (1,000 records) across 3 simulated banks
+- Run the same 20-round federated experiment
+- Report accuracy, AUC, consistency, and fairness metrics on German Credit
+- Show that FedTrust-Credit generalizes beyond a single dataset
+
+**Why it matters:** Cross-dataset validation strengthens the paper's contribution claims and demonstrates the framework is dataset-agnostic.
+
+---
+
+### 9.6 Publication-Ready Figures & Final Report
+
+**What's done:** Benchmark plots are generated (`results/plots/`). A 75% review document is written.
+
+**What remains:**
+- Generate camera-ready plots: ROC curves per method, SHAP beeswarm plots per client, consistency gain sweep (λ sensitivity), per-round accuracy trajectory
+- Write complete academic report sections: Abstract, Introduction, Related Work, Methodology, Experiments, Results, Conclusion
+- Format references in IEEE citation style
+- Prepare 10-minute viva demo script with live API demonstration
+
+---
+
+### Summary: Remaining 25%
+
+| Task | Priority | Estimated Effort |
+|---|---|---|
+| Azure VM live deployment | High | 3–4 hours |
+| CloudWatch visual dashboard | Medium | 1–2 hours |
+| Differential privacy (ε-DP) | High | 4–5 hours |
+| Byzantine robustness test | High | 3–4 hours |
+| German Credit cross-dataset | Medium | 2–3 hours |
+| Final report + camera-ready figures | High | 6–8 hours |
+
+---
+
+## 10. Key Design Decisions
 
 | Decision | Rationale |
 |---|---|
-| LightGBM over XGBoost/RF | 4x faster training on tabular data; native SHAP TreeExplainer support |
+| LightGBM over XGBoost/RF | 4× faster training; native TreeSHAP support |
 | Spearman (not Pearson) for consistency | Rank correlation is robust to SHAP magnitude differences across non-IID clients |
-| Serialize models to disk | Eliminates 1.6 GB CSV reload on cloud startup; fits in 512 MB free tier |
+| Serialize models to disk | Eliminates 1.6 GB CSV reload; fits in 512 MB free-tier RAM |
 | IAM Instance Profile over access keys | Zero secret rotation risk; no hardcoded credentials in Docker image |
-| boto3 optional import in service | Service starts and serves predictions even if AWS unavailable; graceful degradation |
+| Optional boto3 import | Service starts and serves predictions even if AWS unavailable |
 
 ---
 
-## 12. References
+## 11. References
 
 1. "Federated Learning Architectures for Credit Risk Assessment," IEEE, 2025.
 2. "Federated Learning for Credit Risk Assessment," HICSS, 2023.
@@ -278,5 +331,5 @@ Tests cover: consistency score, cosine similarity, per-client agreement, all API
 4. "Federated SHAP: Privacy-Preserving and Consistent Explainability," Springer ML, 2025.
 5. A. Bogdanova et al., "DC-SHAP for Consistent Explainability in Distributed ML," Human-Centric Intelligent Systems, 2023.
 6. H. Y. Wong et al., "Stratify: Rethinking Federated Learning for Non-IID Data," arXiv:2504.13462, 2025.
-7. "Interpretable AI in Credit Scoring: Comparative Survey of SHAP, LIME," R Discovery, 2025.
-8. "A Privacy-Preserving Cloud Architecture for Distributed Machine Learning," arXiv:2512.10341, 2025.
+7. "Interpretable AI in Credit Scoring: SHAP, LIME Comparative Survey," R Discovery, 2025.
+8. "A Privacy-Preserving Cloud Architecture for Distributed ML at Scale," arXiv:2512.10341, 2025.
