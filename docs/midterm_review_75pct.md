@@ -36,10 +36,6 @@ Three bank clients, each in an isolated cloud network (AWS VPC or Azure VNet), t
 > Replace this block with a screenshot of: **AWS Console → EC2 → Instances** showing the running `fedtrust-dashboard` instance with Public IP, Instance State = Running, and Region `us-east-1`.
 > *(Filename suggestion: `aws_ec2_instance.png`)*
 
-> **📸 SCREENSHOT PLACEHOLDER — AWS VPC Dashboard**
-> Replace this block with a screenshot of: **AWS Console → VPC → Your VPCs** showing the isolated VPCs (`vpc-bank-1`, `vpc-bank-2`, and the Aggregator VPC).
-> *(Filename suggestion: `aws_vpc_dashboard.png`)*
-
 ---
 
 ## 3. Novel Contribution — Aggregation Algorithm
