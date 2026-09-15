@@ -511,8 +511,8 @@ def predict_credit_risk(applicant: LoanApplicantRequest):
     if "default_probability" in res:
         prob = float(res["default_probability"])
         cloud_manager.log_metric_to_cloudwatch("DefaultProbability", prob, "None")
-        # Trigger AWS SNS email/SMS alert if applicant is high risk (>60% default chance)
-        if prob >= 0.60:
+        # Trigger AWS SNS email/SMS alert if applicant is high risk (>35% default chance)
+        if prob >= 0.35:
             cloud_manager.publish_high_risk_sns_alert(applicant.model_dump(), prob)
 
     return res
