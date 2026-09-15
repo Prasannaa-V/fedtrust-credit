@@ -508,8 +508,8 @@ def predict_credit_risk(applicant: LoanApplicantRequest):
     res = engine.predict_and_explain(applicant.model_dump())
 
     # Cloud Telemetry: Log Default Probability to Amazon CloudWatch
-    if "default_probability" in res:
-        prob = float(res["default_probability"])
+    if "default_probability_pct" in res:
+        prob = float(res["default_probability_pct"])
         cloud_manager.log_metric_to_cloudwatch("DefaultProbability", prob, "None")
         # Trigger AWS SNS email/SMS alert if applicant is high risk (>35% default chance)
         if prob >= 0.35:
