@@ -44,6 +44,7 @@ if str(SRC_DIR) not in sys.path:
 from consistency_score import _cosine_similarity, explanation_consistency_score, per_client_agreement
 from aggregation_strategy import explanation_consistency_aware_aggregate
 from data_partition import load_and_clean, partition_noniid, prepare_features, get_client_splits, build_shared_feature_columns
+from aws_integrations import cloud_manager
 
 app = FastAPI(
     title="FedTrust-Credit Service",
@@ -463,6 +464,9 @@ def simulate_federated_round(req: SimulateRoundRequest):
     total_bytes = weight_bytes + shap_bytes
     overhead_pct = (shap_bytes / weight_bytes) * 100.0
 
+    # Cloud Telemetry: Log Explanation Consistency Score to Amazon CloudWatch
+    cloud_manager.log_metric_to_cloudwatch("ExplanationConsistencyScore", global_cons, "None")
+
     return {
         "consistency_gain": req.consistency_gain,
         "global_consistency": round(global_cons, 5),
@@ -492,9 +496,35 @@ def predict_credit_risk(applicant: LoanApplicantRequest):
     """
     Scores loan applicant default risk using REAL Lending Club-trained models
     and produces TreeSHAP explanations alongside multi-institution consensus evaluation.
+    Publishes real-time telemetry to Amazon CloudWatch and triggers AWS SNS alert on high risk.
     """
     res = engine.predict_and_explain(applicant.model_dump())
+
+    # Cloud Telemetry: Log Default Probability to Amazon CloudWatch
+    if "default_probability" in res:
+        prob = float(res["default_probability"])
+        cloud_manager.log_metric_to_cloudwatch("DefaultProbability", prob, "None")
+        # Trigger AWS SNS email/SMS alert if applicant is high risk (>60% default chance)
+        if prob >= 0.60:
+            cloud_manager.publish_high_risk_sns_alert(applicant.model_dump(), prob)
+
     return res
+
+
+# ── AWS Cloud Integrations Endpoints ──────────────────────────────────────────
+
+@app.get("/api/aws/status")
+def get_aws_status():
+    """Returns the live status of all integrated AWS cloud services."""
+    return cloud_manager.get_cloud_status()
+
+class S3UploadRequest(BaseModel):
+    bucket_name: Optional[str] = Field(default="", description="Target S3 Bucket Name")
+
+@app.post("/api/aws/s3/upload")
+def upload_models_s3(req: S3UploadRequest):
+    """Uploads serialized models and publication plots to Amazon S3 bucket."""
+    return cloud_manager.upload_models_to_s3(bucket_name=req.bucket_name or None)
 
 
 # ── Mount Static Frontend Assets ──────────────────────────────────────────────
