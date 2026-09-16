@@ -1030,3 +1030,46 @@ select:focus, input:focus {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Cloud Status Tab ──────────────────────────────────────────────────────── */
+.cloud-provider-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+.cloud-provider-card { padding: 1.5rem; }
+.provider-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.provider-status-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--text-subtle); transition: background 0.3s; }
+.provider-status-dot.online { background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); animation: pulse-dot 2s infinite; }
+.provider-status-dot.offline { background: var(--accent-crimson); }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.provider-info h3 { font-size: 1.05rem; margin-bottom: 0.3rem; }
+.provider-info p { font-size: 0.85rem; color: var(--text-muted); margin: 0.15rem 0; }
+.provider-services { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.service-loading { color: var(--text-muted); font-size: 0.85rem; }
+.service-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0.6rem; border-radius: var(--radius-sm); font-size: 0.85rem; }
+.service-row.service-ok { background: rgba(16, 185, 129, 0.06); }
+.service-row.service-warn { background: rgba(245, 158, 11, 0.08); }
+.svc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.svc-dot.ok { background: var(--accent-emerald); }
+.svc-dot.warn { background: var(--accent-amber); }
+.svc-name { flex: 1; color: var(--text-main); }
+.svc-status-label { font-size: 0.75rem; font-weight: 600; color: var(--accent-emerald); background: rgba(16, 185, 129, 0.12); padding: 0.15rem 0.5rem; border-radius: 20px; }
+.svc-detail { font-size: 0.75rem; color: var(--text-subtle); padding: 0 0.6rem 0.3rem 2rem; font-family: var(--font-mono); }
+.arch-diagram-card { padding: 1.5rem; margin-bottom: 1.5rem; }
+.arch-diagram-card h3 { margin-bottom: 1.25rem; }
+.arch-flow { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.arch-node { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; padding: 1rem 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); min-width: 120px; text-align: center; }
+.bank-node { background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.25); }
+.aggregator-node { background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.35); }
+.cloud-node { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.25); }
+.arch-icon { font-size: 1.6rem; }
+.arch-label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+.arch-sub { font-size: 0.72rem; color: var(--text-muted); }
+.arch-arrow { font-size: 1.4rem; color: var(--text-subtle); flex-shrink: 0; }
+.arch-note { margin-top: 1rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-muted); border-left: 3px solid var(--primary); }
+.cloud-metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.cloud-metric-card { padding: 1.25rem; text-align: center; }
+.cloud-metric-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+.cloud-metric-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.35rem; }
+.cloud-metric-val { font-size: 1.05rem; font-weight: 700; color: var(--accent-cyan); font-family: var(--font-mono); }
+.cloud-metric-sub { font-size: 0.72rem; color: var(--text-subtle); margin-top: 0.3rem; }
+.cloud-refresh-row { display: flex; align-items: center; gap: 1.25rem; padding: 1rem 1.5rem; }
+.refresh-note { font-size: 0.82rem; color: var(--text-subtle); }
+@media (max-width: 900px) { .cloud-provider-row { grid-template-columns: 1fr; } .cloud-metrics-row { grid-template-columns: 1fr 1fr; } }

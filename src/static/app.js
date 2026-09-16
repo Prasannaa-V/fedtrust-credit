@@ -1,5 +1,3 @@
-// FedTrust-Credit Interactive Dashboard Client Logic
-
 document.addEventListener("DOMContentLoaded", () => {
   initTabs();
   initPlotGallery();
@@ -11,7 +9,69 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load real benchmark data from API
   loadRealMetrics();
   loadServiceHealth();
+  loadCloudStatus();
 });
+
+/* ── 0b. Load Cloud/AWS Status ──────────────────────────────────────────────── */
+
+async function loadCloudStatus() {
+  const dot = document.getElementById("awsStatusDot");
+  const list = document.getElementById("awsServicesList");
+  const lastRefresh = document.getElementById("cloudLastRefresh");
+
+  try {
+    const res = await fetch("/api/aws/status");
+    if (!res.ok) throw new Error("Status endpoint error");
+    const data = await res.json();
+
+    // Update dot colour
+    if (dot) {
+      dot.classList.remove("online", "offline");
+      dot.classList.add(data.aws_connected ? "online" : "offline");
+    }
+
+    if (list && data.services) {
+      const svcMap = {
+        ec2:        { icon: "🖥️",  label: "EC2 Aggregator",   key: "ec2" },
+        s3:         { icon: "📦",  label: "S3 Model Registry", key: "s3" },
+        cloudwatch: { icon: "📊",  label: "CloudWatch Telemetry", key: "cloudwatch" },
+        sns:        { icon: "🔔",  label: "SNS Alerts",        key: "sns" },
+        iam:        { icon: "🔐",  label: "IAM Credentials",   key: "iam" },
+      };
+
+      list.innerHTML = Object.entries(svcMap).map(([key, meta]) => {
+        const svc = data.services[key];
+        if (!svc) return "";
+        const ok = svc.status === "active" || svc.status === "configured";
+        const detail = svc.bucket_name || svc.namespace || svc.topic_arn || svc.policy || svc.description || svc.role || "";
+        return `
+          <div class="service-row ${ok ? "service-ok" : "service-warn"}">
+            <span class="svc-dot ${ok ? "ok" : "warn"}"></span>
+            <span class="svc-name">${meta.icon} ${meta.label}</span>
+            <span class="svc-status-label">${svc.status}</span>
+          </div>
+          ${detail ? `<div class="svc-detail">${detail}</div>` : ""}
+        `;
+      }).join("");
+
+      // Update S3 bucket name chip
+      const s3Chip = document.getElementById("s3BucketName");
+      if (s3Chip && data.services.s3?.bucket_name) {
+        s3Chip.textContent = data.services.s3.bucket_name;
+      }
+    }
+
+    if (lastRefresh) {
+      lastRefresh.textContent = "Last refreshed: " + new Date().toLocaleTimeString();
+    }
+
+  } catch (err) {
+    if (dot) { dot.classList.add("offline"); }
+    if (list) { list.innerHTML = `<div class="service-row service-warn"><span class="svc-dot warn"></span><span class="svc-name">Could not reach API</span><span class="svc-status-label">offline</span></div>`; }
+    if (lastRefresh) { lastRefresh.textContent = "Failed to refresh — " + err.message; }
+  }
+}
+
 
 /* ── 0. Load Real Benchmark Metrics from API ─────────────────────────────────── */
 

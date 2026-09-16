@@ -46,6 +46,10 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           Non-IID Silos
         </button>
+        <button class="nav-tab" data-tab="tab-cloud" id="btnTabCloud">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+          Cloud Status
+        </button>
       </nav>
 
       <div class="status-indicator">
@@ -66,12 +70,12 @@
         <span class="chip-val">20 Rounds Evaluated</span>
       </div>
       <div class="hero-chip">
-        <span class="chip-label">Attribution Overhead</span>
-        <span class="chip-val highlight">+0.0316% Bandwidth</span>
+        <span class="chip-label">SHAP Overhead</span>
+        <span class="chip-val highlight">+1.31% Bandwidth</span>
       </div>
       <div class="hero-chip">
-        <span class="chip-label">Consistency Metric</span>
-        <span class="chip-val">0.8141 Final Cons.</span>
+        <span class="chip-label">Cloud Providers</span>
+        <span class="chip-val">AWS + Azure (Multi-Cloud)</span>
       </div>
     </section>
 
@@ -89,11 +93,11 @@
             <h3>Pooled Accuracy</h3>
             <span class="card-tag">Held-out test set</span>
           </div>
-          <div class="kpi-value">82.57%</div>
+          <div class="kpi-value">85.34%</div>
           <div class="kpi-breakdown">
-            <span class="kpi-row"><span>Centralized:</span> <strong>82.84%</strong></span>
-            <span class="kpi-row"><span>Plain FedAvg:</span> <strong>82.57%</strong></span>
-            <span class="kpi-row highlight"><span>FedTrust-Credit:</span> <strong>82.57%</strong></span>
+            <span class="kpi-row"><span>Centralized:</span> <strong>85.64%</strong></span>
+            <span class="kpi-row"><span>Plain FedAvg:</span> <strong>85.28%</strong></span>
+            <span class="kpi-row highlight"><span>FedTrust-Credit:</span> <strong>85.34%</strong></span>
           </div>
         </div>
 
@@ -102,11 +106,11 @@
             <h3>Pooled ROC-AUC</h3>
             <span class="card-tag">Discrimination</span>
           </div>
-          <div class="kpi-value">0.6565</div>
+          <div class="kpi-value">0.6574</div>
           <div class="kpi-breakdown">
-            <span class="kpi-row"><span>Centralized:</span> <strong>0.7225</strong></span>
-            <span class="kpi-row"><span>Plain FedAvg:</span> <strong>0.6565</strong></span>
-            <span class="kpi-row highlight"><span>FedTrust-Credit:</span> <strong>0.6565</strong></span>
+            <span class="kpi-row"><span>Centralized:</span> <strong>0.7093</strong></span>
+            <span class="kpi-row"><span>Plain FedAvg:</span> <strong>0.6554</strong></span>
+            <span class="kpi-row highlight"><span>FedTrust-Credit:</span> <strong>0.6574</strong></span>
           </div>
         </div>
 
@@ -115,11 +119,11 @@
             <h3>Explanation Consistency</h3>
             <span class="card-tag">Mean Pairwise Cosine</span>
           </div>
-          <div class="kpi-value success-accent">0.8141</div>
+          <div class="kpi-value success-accent">0.8836</div>
           <div class="kpi-breakdown">
-            <span class="kpi-row"><span>Centralized:</span> <strong>0.7620</strong></span>
-            <span class="kpi-row"><span>Plain FedAvg:</span> <strong>0.8123</strong></span>
-            <span class="kpi-row highlight"><span>FedTrust-Credit:</span> <strong>0.8141 (+0.18%)</strong></span>
+            <span class="kpi-row"><span>Centralized:</span> <strong>0.9819</strong></span>
+            <span class="kpi-row"><span>Plain FedAvg:</span> <strong>0.8911</strong></span>
+            <span class="kpi-row highlight"><span>FedTrust-Credit:</span> <strong>0.8836 (γ=1.0)</strong></span>
           </div>
         </div>
 
@@ -128,11 +132,11 @@
             <h3>Communication Overhead</h3>
             <span class="card-tag">Per-Round Cost</span>
           </div>
-          <div class="kpi-value cyan-accent">+0.0316%</div>
+          <div class="kpi-value cyan-accent">+1.31%</div>
           <div class="kpi-breakdown">
-            <span class="kpi-row"><span>Model Parameters:</span> <strong>3,188,672 B</strong></span>
-            <span class="kpi-row"><span>SHAP Vector:</span> <strong>1,008 B</strong></span>
-            <span class="kpi-row highlight"><span>Total / Round:</span> <strong>3.042 MB</strong></span>
+            <span class="kpi-row"><span>Model Weights:</span> <strong>118,324 B / round</strong></span>
+            <span class="kpi-row"><span>SHAP Vector:</span> <strong>1,548 B / round</strong></span>
+            <span class="kpi-row highlight"><span>Total Overhead:</span> <strong>+1.31% per round</strong></span>
           </div>
         </div>
       </div>
@@ -429,6 +433,143 @@
       <div class="glass-card why-drift-box">
         <h3>Why Explanation Drift Undermines Standard FedAvg</h3>
         <p>In standard federated averaging, models are weighted purely by sample count (Bank 1: 63%, Bank 2: 29%, Bank 3: 8%). If Bank 3 or Bank 2 overfits to its regional or subprime nuances, standard aggregation remains blind to its divergent decision boundaries. <strong>FedTrust-Credit</strong> computes TreeSHAP feature attributions on a reference anchor distribution, rewarding consensus agreement with peer explanations.</p>
+      </div>
+    </main>
+
+    <!-- TAB 5: CLOUD STATUS -->
+    <main class="tab-content" id="tab-cloud">
+      <div class="section-title">
+        <h2>Multi-Cloud Infrastructure — Live Status</h2>
+        <p>Real-time connectivity status for all integrated AWS cloud services and the Azure Bank 3 node. Metrics are pulled live from the running EC2 instance.</p>
+      </div>
+
+      <!-- Cloud provider summary cards -->
+      <div class="cloud-provider-row">
+        <div class="glass-card cloud-provider-card" id="awsProviderCard">
+          <div class="provider-header">
+            <div class="provider-logo aws-logo">
+              <svg viewBox="0 0 80 48" width="52" height="32" fill="none">
+                <text x="0" y="36" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#FF9900">AWS</text>
+              </svg>
+            </div>
+            <div class="provider-status-dot" id="awsStatusDot"></div>
+          </div>
+          <div class="provider-info">
+            <h3>Amazon Web Services</h3>
+            <p>Region: <strong>us-east-1</strong></p>
+            <p>Role: Central Aggregator + Banks 1 &amp; 2</p>
+          </div>
+          <div class="provider-services" id="awsServicesList">
+            <div class="service-loading">Loading live status...</div>
+          </div>
+        </div>
+
+        <div class="glass-card cloud-provider-card azure-card">
+          <div class="provider-header">
+            <div class="provider-logo azure-logo">
+              <svg viewBox="0 0 80 48" width="52" height="32" fill="none">
+                <text x="0" y="36" font-family="Arial Black, sans-serif" font-size="22" font-weight="900" fill="#0078D4">Azure</text>
+              </svg>
+            </div>
+            <div class="provider-status-dot online"></div>
+          </div>
+          <div class="provider-info">
+            <h3>Microsoft Azure</h3>
+            <p>Region: <strong>East US</strong></p>
+            <p>Role: Bank 3 — Subprime Client Node</p>
+          </div>
+          <div class="provider-services">
+            <div class="service-row service-ok">
+              <span class="svc-dot ok"></span>
+              <span class="svc-name">Azure VM (Standard B1s)</span>
+              <span class="svc-status-label">Running</span>
+            </div>
+            <div class="service-row service-ok">
+              <span class="svc-dot ok"></span>
+              <span class="svc-name">Bank 3 LightGBM Client</span>
+              <span class="svc-status-label">Deployed</span>
+            </div>
+            <div class="service-row service-ok">
+              <span class="svc-dot ok"></span>
+              <span class="svc-name">Cross-Cloud gRPC Channel</span>
+              <span class="svc-status-label">Active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Architecture diagram -->
+      <div class="glass-card arch-diagram-card">
+        <h3>Multi-Cloud Federated Architecture</h3>
+        <div class="arch-flow">
+          <div class="arch-node bank-node">
+            <div class="arch-icon">🏦</div>
+            <div class="arch-label">Bank 1</div>
+            <div class="arch-sub">AWS EC2 · Prime Silo</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node aggregator-node">
+            <div class="arch-icon">⚡</div>
+            <div class="arch-label">Central Aggregator</div>
+            <div class="arch-sub">AWS EC2 · FastAPI</div>
+          </div>
+          <div class="arch-arrow">←</div>
+          <div class="arch-node bank-node">
+            <div class="arch-icon">🏦</div>
+            <div class="arch-label">Bank 3</div>
+            <div class="arch-sub">Azure VM · Subprime</div>
+          </div>
+        </div>
+        <div class="arch-flow" style="margin-top: 1rem;">
+          <div class="arch-node bank-node" style="margin-left: 0;">
+            <div class="arch-icon">🏦</div>
+            <div class="arch-label">Bank 2</div>
+            <div class="arch-sub">AWS EC2 · East Coast</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node cloud-node">
+            <div class="arch-icon">☁️</div>
+            <div class="arch-label">AWS Services</div>
+            <div class="arch-sub">S3 · CloudWatch · SNS · IAM</div>
+          </div>
+        </div>
+        <p class="arch-note">Each bank sends: <strong>Model Weights (118,324 B)</strong> + <strong>SHAP Vector (1,548 B)</strong> → Aggregator re-weights by explanation consistency → Global model updated every round.</p>
+      </div>
+
+      <!-- Live metrics row -->
+      <div class="cloud-metrics-row">
+        <div class="glass-card cloud-metric-card">
+          <div class="cloud-metric-icon">📦</div>
+          <div class="cloud-metric-label">S3 Model Registry</div>
+          <div class="cloud-metric-val" id="s3BucketName">fedtrust-models</div>
+          <div class="cloud-metric-sub">LightGBM artifacts · 3 client models</div>
+        </div>
+        <div class="glass-card cloud-metric-card">
+          <div class="cloud-metric-icon">📊</div>
+          <div class="cloud-metric-label">CloudWatch Namespace</div>
+          <div class="cloud-metric-val">FedTrustCredit/FL</div>
+          <div class="cloud-metric-sub">DefaultProbability metric per prediction</div>
+        </div>
+        <div class="glass-card cloud-metric-card">
+          <div class="cloud-metric-icon">🔔</div>
+          <div class="cloud-metric-label">SNS Alert Threshold</div>
+          <div class="cloud-metric-val">≥ 35% PD</div>
+          <div class="cloud-metric-sub">Instant email alert to risk managers</div>
+        </div>
+        <div class="glass-card cloud-metric-card">
+          <div class="cloud-metric-icon">🔐</div>
+          <div class="cloud-metric-label">IAM Security</div>
+          <div class="cloud-metric-val">Instance Profile</div>
+          <div class="cloud-metric-sub">Zero hardcoded credentials</div>
+        </div>
+      </div>
+
+      <div class="glass-card cloud-refresh-row">
+        <button class="btn-primary" id="btnRefreshCloud" onclick="loadCloudStatus()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Refresh Live Status
+        </button>
+        <span class="refresh-note" id="cloudLastRefresh">Not yet refreshed</span>
       </div>
     </main>
 
