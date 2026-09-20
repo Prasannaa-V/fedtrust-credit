@@ -444,6 +444,11 @@ class LoanApplicantRequest(BaseModel):
     home_ownership: str = Field(default="RENT", description="RENT, OWN, MORTGAGE")
     purpose: str = Field(default="debt_consolidation", description="debt_consolidation, credit_card, etc.")
     addr_state: str = Field(default="NY")
+    revol_util: float = Field(default=45.0, ge=0.0, le=150.0, description="Revolving line utilization rate (%)")
+    total_acc: int = Field(default=18, ge=1, le=200, description="Total number of credit accounts")
+    open_acc: int = Field(default=10, ge=0, le=100, description="Number of open credit lines")
+    pub_rec: int = Field(default=0, ge=0, le=20, description="Number of derogatory public records")
+    delinq_2yrs: int = Field(default=0, ge=0, le=30, description="Delinquencies in past 2 years")
 
 
 @app.post("/api/federated/simulate-round")
