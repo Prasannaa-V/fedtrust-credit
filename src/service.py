@@ -188,6 +188,16 @@ class CreditRiskEngine:
         print(f"[CreditRiskEngine] All models trained on REAL data in {elapsed:.1f}s")
         print(f"[CreditRiskEngine] Ready to serve predictions.")
 
+    @staticmethod
+    def _loan_installment(applicant: Dict[str, Any]) -> float:
+        """Approximate monthly installment from loan amount, rate, and term."""
+        p = float(applicant.get("loan_amnt", 15000))
+        r = float(applicant.get("int_rate", 12.0)) / 100 / 12
+        n = float(applicant.get("term", 36))
+        if r == 0:
+            return round(p / n, 2)
+        return round(p * r * (1 + r) ** n / ((1 + r) ** n - 1), 2)
+
     def _build_feature_row(self, applicant: Dict[str, Any]) -> pd.DataFrame:
         """
         Convert a loan applicant dict into a 1-row DataFrame aligned to the
@@ -198,10 +208,18 @@ class CreditRiskEngine:
         row = {col: 0.0 for col in self.shared_feature_cols}
 
         # Numeric features
-        row["loan_amnt"] = float(applicant.get("loan_amnt", 15000.0))
-        row["int_rate"] = float(applicant.get("int_rate", 12.0))
-        row["annual_inc"] = float(applicant.get("annual_inc", 70000.0))
-        row["dti"] = float(applicant.get("dti", 18.0))
+        row["loan_amnt"]   = float(applicant.get("loan_amnt",   15000.0))
+        row["int_rate"]    = float(applicant.get("int_rate",    12.0))
+        row["annual_inc"]  = float(applicant.get("annual_inc",  70000.0))
+        row["dti"]         = float(applicant.get("dti",         18.0))
+        row["revol_util"]  = float(applicant.get("revol_util",  45.0))
+        row["total_acc"]   = float(applicant.get("total_acc",   18.0))
+        row["open_acc"]    = float(applicant.get("open_acc",    10.0))
+        row["pub_rec"]     = float(applicant.get("pub_rec",     0.0))
+        row["revol_bal"]   = float(applicant.get("revol_bal",   12000.0))
+        row["installment"] = float(applicant.get("installment", self._loan_installment(applicant)))
+        if "delinq_2yrs" in row:
+            row["delinq_2yrs"] = float(applicant.get("delinq_2yrs", 0.0))
 
         # Term: one-hot (column names are like term_36.0 or term_60.0)
         term_val = str(float(applicant.get("term", 36)))

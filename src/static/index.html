@@ -312,13 +312,23 @@
             </div>
 
             <div class="input-field">
-              <label for="purpose">Loan Purpose</label>
-              <select id="purpose">
+              <label for="purposeSelect">Loan Purpose</label>
+              <select id="purposeSelect">
                 <option value="debt_consolidation" selected>Debt Consolidation</option>
                 <option value="credit_card">Credit Card Refinancing</option>
                 <option value="home_improvement">Home Improvement</option>
                 <option value="small_business">Small Business</option>
               </select>
+            </div>
+
+            <div class="input-field">
+              <label for="revolUtil">Revolving Utilization (%)</label>
+              <input type="number" id="revolUtil" min="0" max="100" step="1" value="25" required />
+            </div>
+
+            <div class="input-field">
+              <label for="totalAcc">Total Credit Accounts</label>
+              <input type="number" id="totalAcc" min="1" max="100" step="1" value="18" required />
             </div>
 
             <div class="input-field">

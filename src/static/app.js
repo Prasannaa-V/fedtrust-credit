@@ -290,34 +290,19 @@ function renderSimulationResults(data) {
 
 const PERSONA_PRESETS = {
   prime: {
-    loan_amnt: 12000,
-    term: 36,
-    int_rate: 7.9,
-    grade: "A",
-    annual_inc: 110000,
-    dti: 11.5,
-    home_ownership: "MORTGAGE",
-    purpose: "debt_consolidation"
+    loan_amnt: 8000, term: 36, int_rate: 6.5, grade: "A",
+    annual_inc: 120000, dti: 8.5, home_ownership: "MORTGAGE",
+    purpose: "debt_consolidation", revol_util: 12, total_acc: 22,
   },
   balanced: {
-    loan_amnt: 18000,
-    term: 36,
-    int_rate: 14.5,
-    grade: "C",
-    annual_inc: 68000,
-    dti: 21.0,
-    home_ownership: "RENT",
-    purpose: "credit_card"
+    loan_amnt: 12000, term: 36, int_rate: 11.0, grade: "B",
+    annual_inc: 75000, dti: 17.0, home_ownership: "MORTGAGE",
+    purpose: "credit_card", revol_util: 35, total_acc: 14,
   },
   subprime: {
-    loan_amnt: 28000,
-    term: 60,
-    int_rate: 24.8,
-    grade: "E",
-    annual_inc: 42000,
-    dti: 38.5,
-    home_ownership: "RENT",
-    purpose: "small_business"
+    loan_amnt: 35000, term: 60, int_rate: 28.5, grade: "G",
+    annual_inc: 28000, dti: 45.0, home_ownership: "RENT",
+    purpose: "debt_consolidation", revol_util: 95, total_acc: 8,
   }
 };
 
@@ -329,14 +314,16 @@ function initRiskForm() {
     const pKey = e.target.value;
     if (PERSONA_PRESETS[pKey]) {
       const p = PERSONA_PRESETS[pKey];
-      document.getElementById("loanAmnt").value = p.loan_amnt;
-      document.getElementById("term").value = p.term;
-      document.getElementById("intRate").value = p.int_rate;
-      document.getElementById("grade").value = p.grade;
-      document.getElementById("annualInc").value = p.annual_inc;
-      document.getElementById("dti").value = p.dti;
+      document.getElementById("loanAmnt").value     = p.loan_amnt;
+      document.getElementById("term").value          = p.term;
+      document.getElementById("intRate").value       = p.int_rate;
+      document.getElementById("grade").value         = p.grade;
+      document.getElementById("annualInc").value     = p.annual_inc;
+      document.getElementById("dti").value           = p.dti;
       document.getElementById("homeOwnership").value = p.home_ownership;
-      document.getElementById("purpose").value = p.purpose;
+      document.getElementById("purposeSelect").value = p.purpose;
+      document.getElementById("revolUtil").value     = p.revol_util || 30;
+      document.getElementById("totalAcc").value      = p.total_acc || 18;
       evaluateLoanRisk();
     }
   });
@@ -349,15 +336,17 @@ function initRiskForm() {
 
 async function evaluateLoanRisk() {
   const payload = {
-    loan_amnt: parseFloat(document.getElementById("loanAmnt").value),
-    term: parseInt(document.getElementById("term").value),
-    int_rate: parseFloat(document.getElementById("intRate").value),
-    grade: document.getElementById("grade").value,
-    annual_inc: parseFloat(document.getElementById("annualInc").value),
-    dti: parseFloat(document.getElementById("dti").value),
+    loan_amnt:      parseFloat(document.getElementById("loanAmnt").value),
+    term:           parseInt(document.getElementById("term").value),
+    int_rate:       parseFloat(document.getElementById("intRate").value),
+    grade:          document.getElementById("grade").value,
+    annual_inc:     parseFloat(document.getElementById("annualInc").value),
+    dti:            parseFloat(document.getElementById("dti").value),
     home_ownership: document.getElementById("homeOwnership").value,
-    purpose: document.getElementById("purpose").value,
-    addr_state: document.getElementById("addrState").value,
+    purpose:        document.getElementById("purposeSelect").value,
+    addr_state:     document.getElementById("addrState").value,
+    revol_util:     parseFloat(document.getElementById("revolUtil")?.value || 30),
+    total_acc:      parseInt(document.getElementById("totalAcc")?.value || 18),
   };
 
   try {
