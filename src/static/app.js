@@ -3,9 +3,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initPlotGallery();
   initSimulator();
   initRiskForm();
-  // Trigger initial simulation and initial risk scoring
+  // Trigger initial simulation on load
   runSimulation();
-  evaluateLoanRisk();
   // Load real benchmark data from API
   loadRealMetrics();
   loadServiceHealth();
@@ -335,16 +334,20 @@ function initRiskForm() {
 }
 
 async function evaluateLoanRisk() {
+  // Guard: form fields only exist when Credit Assessment tab is active
+  const loanAmntEl = document.getElementById("loanAmnt");
+  if (!loanAmntEl) return;
+
   const payload = {
-    loan_amnt:      parseFloat(document.getElementById("loanAmnt").value),
-    term:           parseInt(document.getElementById("term").value),
-    int_rate:       parseFloat(document.getElementById("intRate").value),
-    grade:          document.getElementById("grade").value,
-    annual_inc:     parseFloat(document.getElementById("annualInc").value),
-    dti:            parseFloat(document.getElementById("dti").value),
-    home_ownership: document.getElementById("homeOwnership").value,
-    purpose:        document.getElementById("purposeSelect").value,
-    addr_state:     document.getElementById("addrState").value,
+    loan_amnt:      parseFloat(loanAmntEl.value),
+    term:           parseInt(document.getElementById("term")?.value || 36),
+    int_rate:       parseFloat(document.getElementById("intRate")?.value || 11.5),
+    grade:          document.getElementById("grade")?.value || "B",
+    annual_inc:     parseFloat(document.getElementById("annualInc")?.value || 75000),
+    dti:            parseFloat(document.getElementById("dti")?.value || 18.5),
+    home_ownership: document.getElementById("homeOwnership")?.value || "RENT",
+    purpose:        document.getElementById("purposeSelect")?.value || "debt_consolidation",
+    addr_state:     document.getElementById("addrState")?.value || "NY",
     revol_util:     parseFloat(document.getElementById("revolUtil")?.value || 30),
     total_acc:      parseInt(document.getElementById("totalAcc")?.value || 18),
   };
