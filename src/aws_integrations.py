@@ -130,11 +130,11 @@ class AWSCloudManager:
             return False
 
         try:
-            subject = f"[FedTrust-Credit Alert] High-Risk Loan Applicant ({default_prob*100:.1f}%)"
+            subject = f"[FedTrust-Credit Alert] High-Risk Loan Applicant ({default_prob:.1f}%)"
             message = (
                 f"FedTrust-Credit Automated Risk Alert\n"
                 f"====================================\n"
-                f"Default Probability : {default_prob*100:.2f}%\n"
+                f"Default Probability : {default_prob:.2f}%\n"
                 f"Risk Classification : CRITICAL / HIGH RISK\n\n"
                 f"Applicant Parameters:\n"
                 f"- Requested Loan  : ${applicant.get('loan_amnt', 0):,.2f}\n"
