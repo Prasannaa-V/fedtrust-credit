@@ -76,7 +76,7 @@
 
 ### D-017: Evaluation Plotting and Communication Metric Accounting
 **Decision**: Communication overhead is computed per round as exact wire payload bytes: model parameter/soft-label vectors (3,188,672 bytes) plus 1D float32 SHAP explanation vector (84 features × 4 bytes × 3 clients = 1,008 bytes).
-**Reason**: Quantifies the exact bandwidth cost of transmitting feature attributions per federated round, proving that adding SHAP consistency-awareness incurs negligible overhead (+0.0316%).
+**Reason**: Quantifies the exact bandwidth cost of transmitting feature attributions per federated round, proving that adding SHAP consistency-awareness incurs negligible overhead (+0.0316% at that time; superseded by D-021 post Session-9 retune: 118,324 B + 1,548 B = +1.3083%).
 
 ### D-018: CONSISTENCY_GAIN Sweep and Empirical Null-Effect Finding
 **Decision**: Tested `CONSISTENCY_GAIN` values across [0.0, 0.5, 1.0, 2.0, 5.0, 10.0] for 20 rounds under identical conditions. Report the result plainly as a legitimate null-effect finding on this dataset, without tuning or perturbing partitions/features to force artificial gains.
@@ -88,6 +88,30 @@
 ### D-019: Model Artifact Serialization for Cloud Low-Memory Serving
 **Decision**: Export trained LightGBM model boosters, shared feature indices, and metadata into lightweight disk artifacts (`models/global_model.joblib`, `models/client_*.joblib`, `models/model_metadata.json`). The production FastAPI service checks for these artifacts on startup before attempting raw CSV ingestion.
 **Reason**: Loading and training on the 1.6GB raw dataset at container boot requires >2.5GB RAM and ~70s, which triggers OOM kills on standard cloud free tiers (AWS `t2.micro` has 1GB RAM, Render free tier has 512MB RAM). Serialized artifacts load in <0.5 seconds and consume <280MB RAM, enabling reliable deployment on low-cost cloud instances without losing any predictive or TreeSHAP explainability capabilities.
+
+### D-020: Cosine Similarity as Consistency Metric (Spearman Wording Correction)
+**Decision**: Implementation uses mean pairwise **cosine similarity** on mean-absolute SHAP vectors (`src/consistency_score.py:22-55`). References to "Spearman rank correlation" in `AGENTS.md`, `README.md`, and `docs/midterm_review_75pct.md:48` are corrected to cosine.
+**Reason**: Cosine matches Section 3.3 pseudocode in `docs/initial_review_report.md:522`, is magnitude-aware for TreeSHAP importance vectors, and is what all executed results (`results/full_metrics_summary.json`, gain sweep D-018) were computed with. Switching to Spearman now would invalidate all benchmarks. Future work may evaluate Spearman as an alternative ranking-robust variant.
+
+### D-021: Communication Overhead Grounded Values (Post Session-9 Re-run)
+**Decision**: Canonical overhead is `weights=118,324 B`, `shap=1,548 B`, total `119,872 B` (`+1.3083%`) from `results/full_metrics_summary.json:84-95`. `src/service.py` simulator constants updated from stale `3,188,672 B / 1,008 B` to these values.
+**Reason**: Session 9 hyperparameter retune changed model size and shared feature count. Simulator must return grounded numbers per AGENTS rule 1.
+
+### D-022: DP via Clipped Gaussian on Prediction Vectors
+**Decision**: `(epsilon, delta)`-DP implemented in `src/local_training.py:fit(config)` — L2-clip param vector to `C=1.0`, add `N(0, sigma^2)` with `sigma=C*sqrt(2 ln(1.25/delta))/epsilon`, `delta=1e-5`. Opt-in via `config={"dp_epsilon": eps}`; default `None` preserves exact pre-DP path. Sweep runner `src/run_differential_privacy.py` covers `epsilon in [0.1, 10.0]`.
+**Reason**: Prediction-vector federation (D-011) has bounded sensitivity; output perturbation is the minimal honest DP step without redesigning LightGBM training. SHAP vectors left un-noised and documented as future work.
+
+### D-023: Byzantine Evaluation (Label-Flip + Weight-Poison on Bank 3)
+**Decision**: `src/byzantine_attack.py` poisons only `client_3`: label-flip (`1->0`, `flip_frac`) pre-training, weight-poison (`N(0, scale)`) post-training. Same poisoned federation run under `gain=0` vs `gain=1.0`; attacker `a_3`/`w_3` logged per round to `results/byzantine/attack_results.json` with plot `results/plots/byzantine_robustness.png`.
+**Reason**: Isolates defense effect to aggregation reweighting; mirrors midterm §9.3 claim that consistency scoring naturally down-weights divergent SHAP.
+
+### D-024: German Credit via OpenML + History Partition
+**Decision**: `src/german_credit.py` loads UCI German Credit (1,000 rows) via `sklearn.datasets.fetch_openml("credit-g")`, partitions 3-way by `credit_history` (fallback: stratified thirds), LightGBM `n_estimators=100`, 10 rounds. Outputs `results/german/german_results.json` + `results/plots/german_credit_benchmark.png`.
+**Reason**: Small-n dataset needs fewer trees/rounds for stable signal; history axis gives genuine non-IID split analogous to LendingClub grade axis.
+
+### D-025: CloudWatch Dashboard (Terraform + boto3)
+**Decision**: `terraform/aws_monitoring.tf` gains `aws_cloudwatch_dashboard.fedtrust_dashboard` (DefaultProbability, ConsistencyScore, latency, alarm panel); `src/deploy_cloudwatch_dashboard.py` mirrors layout via `put_dashboard` with `--dry-run` for CI.
+**Reason**: Visual proof required by midterm §9.1; Terraform is source of truth, script enables refresh without `terraform apply`.
 
 
 

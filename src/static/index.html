@@ -199,6 +199,27 @@
             <p class="control-desc">Simulates demographic feature importance shifts between participating institutions.</p>
           </div>
 
+          <div class="control-group">
+            <div class="slider-header">
+              <label for="attackSelect">Byzantine Attack (Bank 3):</label>
+            </div>
+            <select id="attackSelect" class="select-input">
+              <option value="none" selected>None (honest)</option>
+              <option value="label_flip">Label-flip attack</option>
+              <option value="weight_poison">Weight-poison attack</option>
+            </select>
+            <p class="control-desc">Malicious Bank 3 diverges; watch its agreement a₃ drop and weight w₃* penalized.</p>
+          </div>
+
+          <div class="control-group">
+            <div class="slider-header">
+              <label for="dpEpsilonSlider">DP Epsilon (ε demo):</label>
+              <span class="slider-val" id="dpEpsilonDisplay">off</span>
+            </div>
+            <input type="range" id="dpEpsilonSlider" min="0.1" max="10.0" step="0.1" value="10.0" class="range-slider" />
+            <p class="control-desc">Smaller ε = more Gaussian noise on explanations (demo only).</p>
+          </div>
+
           <button id="btnRunSim" class="btn-primary">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             Recompute Aggregation Weights
@@ -329,6 +350,21 @@
             <div class="input-field">
               <label for="totalAcc">Total Credit Accounts</label>
               <input type="number" id="totalAcc" min="1" max="100" step="1" value="18" required />
+            </div>
+
+            <div class="input-field">
+              <label for="openAcc">Open Credit Lines</label>
+              <input type="number" id="openAcc" min="0" max="100" step="1" value="10" required />
+            </div>
+
+            <div class="input-field">
+              <label for="pubRec">Derogatory Public Records</label>
+              <input type="number" id="pubRec" min="0" max="20" step="1" value="0" required />
+            </div>
+
+            <div class="input-field">
+              <label for="delinq2yrs">Delinquencies (past 2 yrs)</label>
+              <input type="number" id="delinq2yrs" min="0" max="30" step="1" value="0" required />
             </div>
 
             <div class="input-field">

@@ -55,3 +55,68 @@ resource "aws_cloudwatch_metric_alarm" "round_latency_alarm" {
   alarm_description   = "Triggered when federated training round takes longer than 120 seconds"
   treat_missing_data  = "notBreaching"
 }
+
+# Visual Dashboard: FedTrust-Credit live monitoring grid (Task 4)
+resource "aws_cloudwatch_dashboard" "fedtrust_dashboard" {
+  dashboard_name = "fedtrust-credit"
+  dashboard_body = jsonencode({
+    widgets = [
+      {
+        type   = "metric"
+        x      = 0
+        y      = 0
+        width  = 12
+        height = 6
+        properties = {
+          title   = "DefaultProbability (per prediction)"
+          metrics = [["FedTrustCredit/FL", "DefaultProbability"]]
+          period  = 60
+          stat    = "Average"
+          region  = var.aws_region
+        }
+      },
+      {
+        type   = "metric"
+        x      = 12
+        y      = 0
+        width  = 12
+        height = 6
+        properties = {
+          title   = "ExplanationConsistencyScore (per round)"
+          metrics = [["FedTrustCredit/FL", "ExplanationConsistencyScore"]]
+          period  = 300
+          stat    = "Average"
+          region  = var.aws_region
+        }
+      },
+      {
+        type   = "metric"
+        x      = 0
+        y      = 6
+        width  = 12
+        height = 6
+        properties = {
+          title   = "RoundLatencySeconds"
+          metrics = [["FedTrustCredit/FL", "RoundLatencySeconds"]]
+          period  = 300
+          stat    = "Average"
+          region  = var.aws_region
+        }
+      },
+      {
+        type   = "alarm"
+        x      = 12
+        y      = 6
+        width  = 12
+        height = 6
+        properties = {
+          title  = "Alarm states (consistency drift + latency)"
+          alarms = [
+            "arn:aws:cloudwatch:${var.aws_region}:*:alarm:fedtrust-consistency-drop-warning",
+            "arn:aws:cloudwatch:${var.aws_region}:*:alarm:fedtrust-round-latency-high"
+          ]
+        }
+      }
+    ]
+  })
+}

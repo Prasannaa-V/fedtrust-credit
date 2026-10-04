@@ -376,3 +376,35 @@ tests/test_service_api.py ........        [100%]
 
 ---
 
+## Session 11 — 2026-10-04 (100% roadmap build)
+
+**Phase**: Pre-flight fixes + Tasks 1-5 implementation, heavy runs in progress
+
+**What was built**:
+1. **Phase 0 fixes**: `src/service.py` overhead constants `3188672/1008` → `118324/1548` (D-021); `cloud_manager` None-guards on both telemetry paths; D-020 cosine-vs-Spearman correction in `AGENTS.md`/`README.md`/`DECISIONS.md`; synced `agents.md`.
+2. **Task 1 DP**: `src/local_training.py:fit(config)` L2-clip (C=1.0) + Gaussian `sigma=C*sqrt(2ln(1.25/delta))/eps` (D-022); runner `src/run_differential_privacy.py` (eps sweep → `results/dp/dp_sweep.json` + `differential_privacy_tradeoff.png`).
+3. **Task 2 Byzantine**: `src/byzantine_attack.py` (Bank-3 label-flip + weight-poison, gain 0 vs 1.0, per-round a3/w3 → `results/byzantine/attack_results.json` + `byzantine_robustness.png`). Live demo verified: `attack_mode=label_flip` drops simulator consistency ~0.81 → 0.4933. Fast grounded run: a3=0.0, w3 0.333→0.277.
+4. **Task 3 German**: `src/german_credit.py` (OpenML credit-g cached, 5 rounds → `results/german/german_results.json` + `german_credit_benchmark.png`). Grounded: FedAvg/Ours 0.7662 acc, ours cons 0.9717.
+5. **Task 4 Dashboard**: `aws_cloudwatch_dashboard.fedtrust_dashboard` in `terraform/aws_monitoring.tf` + `src/deploy_cloudwatch_dashboard.py` (`--dry-run` verified).
+6. **Task 5 UI**: Byzantine `attackSelect` + DP `dpEpsilonSlider` in `index.html`/`app.js` (backward-compatible); risk form completed with `openAcc/pubRec/delinq2yrs` to match `LoanApplicantRequest` (Pydantic rule).
+7. **Task 6 docs**: `docs/final_project_report_100pct.md` (grounded numbers only, TODOs for pending runs), `docs/VIVA_PRESENTATION_GUIDE.md` (10-min script + 15 Q&A).
+8. **Tests**: new `tests/test_robustness_privacy.py` (4/4 passed); full suite 13/13 still green; full-payload `/api/predict/risk` verified `200 6.52 Low (Prime)`.
+
+**Heavy runs — slow full-data jobs killed, replaced by fast grounded runs**:
+- Killed: full-data Byzantine 10-round (no round-1 after 30 min) + German 10-round (0-byte log, double-`fetch_openml` bug, since fixed with CSV cache).
+- German fast: DONE (see above).
+- Byzantine fast: DONE (see above).
+- DP sweep fast (`--rounds 3 --max-train 15000 --n-estimators 50`, eps 0.5/1.0/5.0/10.0 + clean) launched in background; pending.
+- German: OpenML `credit-g` cached to `data/german/credit-g.csv`; 5 rounds, 48 feats, partitions 334/333/333 (fallback thirds). Centralized 0.74/0.7817/0.5094/0.9759; FedAvg 0.7662/0.8279/0.6050/0.9702; Ours 0.7662/0.8279/0.6050/0.9717. Plot `german_credit_benchmark.png` (31KB).
+- Byzantine: label-flip Bank-3, 5 rounds, 15k/client, 50 trees. Attacker a3=0.0 all rounds; FedAvg w3=0.3333 vs Ours w3≈0.277 (−5.6pp); acc ~0.768 both. Plot `byzantine_robustness.png`.
+- DP sweep fast (`--rounds 3 --max-train 15000 --n-estimators 50`, eps 0.5/1.0/5.0/10.0 + clean) DONE: clean 0.77337; eps10 0.77298; eps5 0.77280; eps1.0/0.5 0.77192. Monotonic, small magnitude. Plot `differential_privacy_tradeoff.png` (60KB).
+
+**What's next**:
+1. ~~Fill Byzantine/DP/German tables~~ DONE (all grounded, report §§3-5).
+2. ~~DP sweep~~ DONE (clean 0.77337 → eps0.5 0.77192, monotonic).
+3. Final `pytest`: **17/17 passed in 4.18s**. Service boots via `models/*.joblib`.
+4. `git add` + `git push` (pending user confirm).
+
+
+---
+

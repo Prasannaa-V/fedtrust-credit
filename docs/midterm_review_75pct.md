@@ -16,7 +16,7 @@
 
 Financial institutions cannot share raw customer data due to privacy regulations (GDPR, Fair Lending, CCPA), yet an isolated bank's model suffers from distributional bias and poor generalization.
 
-**FedTrust-Credit** addresses this with a **Federated Learning** framework in which three simulated banks — each operating in a private cloud VPC — collaboratively train a credit risk model without ever sharing raw loan records. Our **novel contribution** is the **Explanation-Consistency-Aware Aggregation** mechanism: rather than aggregating model weights uniformly (FedAvg), the central aggregator additionally collects each client's TreeSHAP explanation vectors and re-weights contributions based on pairwise Spearman explanation agreement.
+**FedTrust-Credit** addresses this with a **Federated Learning** framework in which three simulated banks — each operating in a private cloud VPC — collaboratively train a credit risk model without ever sharing raw loan records. Our **novel contribution** is the **Explanation-Consistency-Aware Aggregation** mechanism: rather than aggregating model weights uniformly (FedAvg), the central aggregator additionally collects each client's TreeSHAP explanation vectors and re-weights contributions based on pairwise cosine-similarity explanation agreement (D-020).
 
 ---
 
@@ -45,7 +45,7 @@ Three bank clients, each in an isolated cloud network (AWS VPC or Azure VNet), t
 Standard FedAvg aggregates weights proportional to local dataset size only. Our method additionally incorporates **explanation consistency** as an aggregation signal:
 
 ```
-CS(i,j)  = SpearmanCorr(|φ_i|, |φ_j|)         # pairwise SHAP consistency
+CS(i,j)  = CosineSim(|φ_i|, |φ_j|)           # pairwise SHAP consistency
 score(i) = mean(CS(i,j)) for all j ≠ i          # per-client consensus
 gain(i)  = 1 + λ × (score(i) − score_mean)      # consistency gain factor
 α(i)     = (n_i × gain(i)) / Σ(n_j × gain(j))  # normalized weight
@@ -342,7 +342,7 @@ tests/test_service_api.py ........        [100%]
 | Decision | Rationale |
 |---|---|
 | LightGBM over XGBoost/RF | 4× faster training; native TreeSHAP support |
-| Spearman (not Pearson) for consistency | Rank correlation is robust to SHAP magnitude differences across non-IID clients |
+| Cosine similarity (not Pearson) for consistency | Magnitude-aware and matches §3.3 pseudocode; rank correlation noted as future work (D-020) |
 | Serialize models to disk | Eliminates 1.6 GB CSV reload; fits in 512 MB free-tier RAM |
 | IAM Instance Profile over access keys | Zero secret rotation risk; no hardcoded credentials in Docker image |
 | Optional boto3 import | Service starts and serves predictions even if AWS unavailable |

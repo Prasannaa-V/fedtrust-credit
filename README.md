@@ -30,7 +30,7 @@ Credit risk models built across independent lending institutions face two fundam
 
 **FedTrust-Credit** introduces **Explanation-Consistency-Aware Aggregation**:
 - In each round, clients compute local feature importances on a reference anchor distribution using **TreeSHAP**.
-- The server evaluates pairwise Spearman rank correlation of feature rankings among participating institutions.
+- The server evaluates pairwise cosine similarity of mean-absolute attribution vectors among participating institutions (D-020).
 - Clients showing higher consensus with peer explanations receive an upweighted contribution via a tuned `CONSISTENCY_GAIN` parameter.
 
 ---
@@ -53,7 +53,7 @@ flowchart TD
     end
 
     subgraph Server Aggregation Layer
-        F --> G[Calculate Pairwise Spearman Consistency Matrix]
+        F --> G[Calculate Pairwise Cosine Consistency Matrix]
         G --> H[Derive Per-Client Agreement Score a_i]
         H --> I[Compute Consistency-Aware Weights w_i*]
         I --> J[FedDF-Style Prediction Aggregation]
@@ -71,22 +71,22 @@ Benchmarked across 20 federated communication rounds using 1,344,976 cleaned loa
 
 | Metric | Centralized Baseline | Plain FedAvg ($\gamma=0.0$) | FedTrust-Credit ($\gamma=1.0$) |
 |:---|:---:|:---:|:---:|
-| **Pooled Accuracy** | **0.8284** | 0.8257 | 0.8257 |
-| **Pooled ROC-AUC** | **0.7225** | 0.6565 | 0.6565 |
-| **Pooled Macro F1** | 0.0943 | 0.1187 | **0.1186** |
-| **Final Consistency Score** | 0.7620 | 0.8123 | **0.8141** |
-| **Steady-State Consistency** | 0.7620 | 0.8114 | **0.8118** |
-| **Fairness (Acc Spread)** | 0.1783 | 0.1881 | 0.1887 |
-| **Comm Overhead / Round** | N/A | 3,188,672 bytes | 3,189,680 bytes (**+0.0316%**) |
+| **Pooled Accuracy** | **0.8564** | 0.8528 | 0.8534 |
+| **Pooled ROC-AUC** | **0.7093** | 0.6554 | 0.6574 |
+| **Pooled Macro F1** | 0.0668 | 0.0661 | **0.0665** |
+| **Final Consistency Score** | 0.9819 | 0.8911 | **0.8836** |
+| **Steady-State Consistency** | 0.9819 | 0.8907 | **0.8838** |
+| **Fairness (Acc Spread)** | 0.1334 | 0.1436 | 0.1418 |
+| **Comm Overhead / Round** | N/A | 118,324 bytes | 119,872 bytes (**+1.3083%**) |
 
 ### 2. Hyperparameter Sensitivity Sweep (`CONSISTENCY_GAIN` $\gamma$)
 
 Evaluating $\gamma \in \{0.0, 0.5, 1.0, 2.0, 5.0, 10.0\}$ over 20 rounds each revealed that:
-- Baseline attribution consistency across non-IID partitions is naturally high ($\sim 0.81$).
-- Explanation consistency remains in the narrow band $[0.8114, 0.8128]$ ($\le 0.17\%$ variance) across all gain factors.
+- Baseline attribution consistency across non-IID partitions is naturally high ($\sim 0.89$).
+- Explanation consistency remains in a narrow band ($\le 0.2\%$ variance) across all gain factors.
 - Classification accuracy, AUC, and F1 remain rock-stable with **zero degradation**.
-- Weight adjustment per client is bounded by $\le 0.84\%$ due to the high pairwise base agreement across clients.
-- Explanation transmission requires only **1,008 bytes per client per round**, representing a negligible **0.0316%** communication overhead.
+- Weight adjustment per client is bounded by $\le 1\%$ due to the high pairwise base agreement across clients.
+- Explanation transmission requires only **1,548 bytes per round total**, representing a negligible **1.3083%** communication overhead.
 
 ---
 
@@ -123,9 +123,13 @@ fedtrust-credit/
 ├── src/
 │   ├── data_partition.py           # Lending Club loader, preprocessor & non-IID partitioner
 │   ├── local_training.py           # Client-side LightGBM training wrapper
-│   ├── explanation.py              # TreeSHAP computation & pairwise Spearman rank scoring
-│   ├── aggregation.py              # Consistency-aware aggregation mathematics
-│   ├── federation_flower.py        # Flower simulation clients & custom FedAvg strategy
+│   ├── consistency_score.py        # TreeSHAP computation & pairwise cosine-similarity consensus scoring
+│   ├── aggregation_strategy.py     # Consistency-aware aggregation mathematics
+│   ├── fedavg_server.py            # Federated simulation loop & FedAvg aggregation
+│   ├── run_ours.py                 # Consistency-aware federated runner
+│   ├── run_differential_privacy.py # DP epsilon sweep runner
+│   ├── byzantine_attack.py         # Byzantine robustness evaluation
+│   ├── german_credit.py            # German Credit generalization runner
 │   ├── centralized_baseline.py     # Centralized baseline runner
 │   ├── run_experiment.py           # CLI runner for federated variants
 │   └── evaluation.py               # Evaluation, metrics generation, and plotting suite

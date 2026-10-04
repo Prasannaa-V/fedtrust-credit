@@ -377,7 +377,7 @@ def get_status():
         "federated_clients": 3,
         "communication_rounds": 20,
         "consistency_gain": 1.0,
-        "bandwidth_overhead": "+0.0316%",
+        "bandwidth_overhead": "+1.3083%",
         "model_ready": engine.is_ready,
         "feature_space_size": len(engine.shared_feature_cols),
         "status": "online",
@@ -433,6 +433,8 @@ class SimulateRoundRequest(BaseModel):
         description="Dataset rows for Client 1, Client 2, Client 3",
     )
     correlation_noise: float = Field(default=0.02, ge=0.0, le=0.5, description="Attribution noise factor")
+    attack_mode: str = Field(default="none", description="none | label_flip | weight_poison (Bank 3 malicious demo)")
+    dp_epsilon: Optional[float] = Field(default=None, description="DP epsilon demo (smaller = more noise)")
 
 class LoanApplicantRequest(BaseModel):
     loan_amnt: float = Field(default=15000.0, ge=1000.0, le=50000.0)
@@ -462,7 +464,7 @@ def simulate_federated_round(req: SimulateRoundRequest):
     base_weights = [s / total_size for s in sizes]
 
     base_shap = np.array([0.34, 0.28, 0.22, 0.16, 0.12, 0.25, 0.08, 0.06], dtype=np.float32)
-    
+
     rng = np.random.RandomState(int(req.consistency_gain * 100) + 42)
     noise1 = rng.normal(0, req.correlation_noise, size=len(base_shap))
     noise2 = rng.normal(0, req.correlation_noise * 1.2, size=len(base_shap))
@@ -471,6 +473,17 @@ def simulate_federated_round(req: SimulateRoundRequest):
     v1 = np.maximum(0, base_shap + noise1)
     v2 = np.maximum(0, base_shap * 0.95 + noise2)
     v3 = np.maximum(0, base_shap * 0.92 + noise3)
+    # Byzantine demo: force Bank-3 explanation divergence (Task 2)
+    attack_mode = (req.attack_mode or "none").lower()
+    if attack_mode in ("label_flip", "weight_poison", "byzantine"):
+        v3 = np.maximum(0, np.flip(base_shap) + rng.normal(
+            0, req.correlation_noise * 3.0, size=len(base_shap)))
+    # DP demo: perturb explanations with Gaussian noise scaled by 1/epsilon
+    if req.dp_epsilon is not None and req.dp_epsilon > 0:
+        dp_scale = min(0.2, 0.2 / float(req.dp_epsilon))
+        v1 = np.maximum(0, v1 + rng.normal(0, dp_scale, size=len(base_shap)))
+        v2 = np.maximum(0, v2 + rng.normal(0, dp_scale, size=len(base_shap)))
+        v3 = np.maximum(0, v3 + rng.normal(0, dp_scale, size=len(base_shap)))
     shap_vectors = [v1, v2, v3]
 
     sim_matrix = [
@@ -489,13 +502,14 @@ def simulate_federated_round(req: SimulateRoundRequest):
     weight_sum = sum(adjusted_raw)
     adjusted_weights = [w / weight_sum for w in adjusted_raw]
 
-    weight_bytes = 3188672
-    shap_bytes = 1008 if req.consistency_gain > 0.0 else 0
+    weight_bytes = 118324
+    shap_bytes = 1548 if req.consistency_gain > 0.0 else 0
     total_bytes = weight_bytes + shap_bytes
     overhead_pct = (shap_bytes / weight_bytes) * 100.0
 
     # Cloud Telemetry: Log Explanation Consistency Score to Amazon CloudWatch
-    cloud_manager.log_metric_to_cloudwatch("ExplanationConsistencyScore", global_cons, "None")
+    if _AWS_MODULE_OK and cloud_manager is not None:
+        cloud_manager.log_metric_to_cloudwatch("ExplanationConsistencyScore", global_cons, "None")
 
     return {
         "consistency_gain": req.consistency_gain,
@@ -533,10 +547,11 @@ def predict_credit_risk(applicant: LoanApplicantRequest):
     # Cloud Telemetry: Log Default Probability to Amazon CloudWatch
     if "default_probability_pct" in res:
         prob = float(res["default_probability_pct"])  # already a percentage, e.g. 14.45
-        cloud_manager.log_metric_to_cloudwatch("DefaultProbability", prob, "None")
-        # Trigger AWS SNS email/SMS alert if applicant is high risk (>= 35% default chance)
-        if prob >= 35.0:
-            cloud_manager.publish_high_risk_sns_alert(applicant.model_dump(), prob)
+        if _AWS_MODULE_OK and cloud_manager is not None:
+            cloud_manager.log_metric_to_cloudwatch("DefaultProbability", prob, "None")
+            # Trigger AWS SNS email/SMS alert if applicant is high risk (>= 35% default chance)
+            if prob >= 35.0:
+                cloud_manager.publish_high_risk_sns_alert(applicant.model_dump(), prob)
 
     return res
 

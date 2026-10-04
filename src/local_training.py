@@ -95,12 +95,21 @@ class FederatedClient:
     def fit(
         self,
         global_params: list[np.ndarray],
-        config: dict,
+        config: dict | None = None,
     ) -> tuple[list[np.ndarray], int, dict]:
         """
         Local training round.
         Returns: (local_params, num_examples, metrics)
+
+        Differential privacy (optional, D-022): pass
+        ``config={"dp_epsilon": eps, "dp_delta": 1e-5, "dp_clip": 1.0}``.
+        The returned parameter vector is L2-clipped to ``dp_clip`` and
+        perturbed with Gaussian noise
+        ``sigma = C * sqrt(2*ln(1.25/delta)) / epsilon``.
+        ``dp_epsilon=None`` (default) disables noise and preserves the
+        exact pre-DP code path.
         """
+        config = config or {}
         self.set_parameters(global_params)
 
         # Use global soft-label signal as init_score for knowledge distillation
@@ -138,8 +147,26 @@ class FederatedClient:
             f"f1={f1:.4f} | n={len(self.X_train):,}"
         )
 
+        params = self.get_parameters()
+        dp_eps = config.get("dp_epsilon")
+        if dp_eps is not None:
+            dp_delta = float(config.get("dp_delta", 1e-5))
+            dp_clip = float(config.get("dp_clip", 1.0))
+            seed = int(config.get("dp_seed", 42))
+            rng = np.random.RandomState(seed)
+            noisy = []
+            for v in params:
+                v = v.astype(np.float64)
+                norm = float(np.linalg.norm(v))
+                if norm > dp_clip and norm > 0:
+                    v = v * (dp_clip / norm)
+                sigma = dp_clip * np.sqrt(2.0 * np.log(1.25 / dp_delta)) / float(dp_eps)
+                v = v + rng.normal(0.0, sigma, size=v.shape)
+                noisy.append(v.astype(np.float32))
+            params = noisy
+
         return (
-            self.get_parameters(),
+            params,
             len(self.X_train),
             {
                 "client_id":   self.client_id,

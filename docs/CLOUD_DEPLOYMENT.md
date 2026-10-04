@@ -14,7 +14,7 @@
 
 In financial credit risk assessment, data privacy regulations (GDPR, Fair Lending regulations, CCPA) strictly prohibit financial institutions from centralizing customer financial transactions into a single database. However, models trained independently suffer from demographic and institutional bias due to severe non-IID (non-identically and independently distributed) loan distribution.
 
-**FedTrust-Credit** implements a privacy-preserving federated learning system deployed across isolated cloud environments. To prevent uninterpretable or adversarial model drift, our framework introduces **Explanation-Consistency-Aware Aggregation**: client models compute local **TreeSHAP** feature attribution vectors, which are scored for pairwise Spearman consensus by the server to dynamically scale aggregation weights.
+**FedTrust-Credit** implements a privacy-preserving federated learning system deployed across isolated cloud environments. To prevent uninterpretable or adversarial model drift, our framework introduces **Explanation-Consistency-Aware Aggregation**: client models compute local **TreeSHAP** feature attribution vectors, which are scored for pairwise cosine-similarity consensus (D-020) by the server to dynamically scale aggregation weights.
 
 This document details the **production cloud architecture**, **containerization**, **Infrastructure as Code (Terraform)** for multi-cloud deployment (AWS + Azure), **monitoring**, and **live public demo configurations** fulfilling all cloud computing course objectives.
 
@@ -186,7 +186,7 @@ This generates an instant, public HTTPS link that examiners and evaluators can a
 ## 7. Cloud Computing Evaluation Q&A (Viva Preparation)
 
 ### Q1: Why did you choose a multi-cloud architecture (AWS + Azure) instead of deploying everything on AWS?
-> **Answer**: Real-world commercial banks operate on distinct, heterogeneous IT infrastructures. Standardizing on a single cloud provider violates the independence premise of cross-silo federated learning. By deploying Bank 1 and 2 on AWS and Bank 3 on Azure, we prove that our Flower gRPC protocol and TreeSHAP attribution payload (1,008 bytes) operate seamlessly across heterogeneous cloud providers with zero vendor lock-in.
+> **Answer**: Real-world commercial banks operate on distinct, heterogeneous IT infrastructures. Standardizing on a single cloud provider violates the independence premise of cross-silo federated learning. By deploying Bank 1 and 2 on AWS and Bank 3 on Azure, we prove that our Flower gRPC protocol and TreeSHAP attribution payload (1,548 bytes) operate seamlessly across heterogeneous cloud providers with zero vendor lock-in.
 
 ### Q2: How is data privacy enforced in your cloud deployment?
 > **Answer**: Data privacy is protected at three distinct levels:

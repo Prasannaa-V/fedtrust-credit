@@ -16,7 +16,7 @@
 ### The Core Problem & Solution
 Financial institutions cannot share raw borrower data due to strict banking regulations (GDPR, Fair Lending, CCPA). However, training credit risk models locally leads to distributional bias and poor generalization.
 * **Our Solution**: A **Federated Learning** architecture where 3 simulated banks collaboratively train LightGBM credit risk models across isolated cloud networks without ever sharing raw customer data.
-* **Our Novel Contribution**: **Explanation-Consistency-Aware Aggregation**. Instead of standard FedAvg (which weights clients solely on dataset size $n_i$), our central aggregator collects each client's **TreeSHAP explanation vectors** and computes pairwise Spearman rank correlations. Clients whose explanations align with consensus receive an aggregation gain factor ($\lambda$), improving fairness and alignment under non-IID conditions without exposing raw data.
+* **Our Novel Contribution**: **Explanation-Consistency-Aware Aggregation**. Instead of standard FedAvg (which weights clients solely on dataset size $n_i$), our central aggregator collects each client's **TreeSHAP explanation vectors** and computes pairwise cosine-similarity consensus (D-020). Clients whose explanations align with consensus receive an aggregation gain factor ($\lambda$), improving fairness and alignment under non-IID conditions without exposing raw data.
 
 ---
 
@@ -29,7 +29,7 @@ All project specifications, benchmarks, and architectural decisions are cataloge
 | **75% Review Report** | [docs/midterm_review_75pct.md](file:///home/prasannaa/Projects/fed%20trust%20credit/fedtrust-credit/docs/midterm_review_75pct.md) | **Primary Reference**: System architecture, benchmark results (Accuracy, AUC, Consistency, Fairness), live multi-cloud status, and the remaining 25% implementation specifications. | **Start here** for overall context & benchmarks. |
 | **Standalone HTML Review** | [docs/midterm_review_standalone.html](file:///home/prasannaa/Projects/fed%20trust%20credit/fedtrust-credit/docs/midterm_review_standalone.html) | Self-contained, styled HTML version of the review report with embedded diagrams and benchmarks. | For browser presentation or export. |
 | **Cloud Deployment Manual** | [docs/CLOUD_DEPLOYMENT.md](file:///home/prasannaa/Projects/fed%20trust%20credit/fedtrust-credit/docs/CLOUD_DEPLOYMENT.md) | Multi-cloud setup details: AWS EC2, Azure VM, S3 model registry, CloudWatch telemetry, SNS alerts, IAM roles, and Terraform scripts. | When working on cloud infrastructure or deployment. |
-| **Architecture Decisions** | [docs/DECISIONS.md](file:///home/prasannaa/Projects/fed%20trust%20credit/fedtrust-credit/docs/DECISIONS.md) | Full log of architectural decisions (`D-001` through `D-019`), including rationale for LightGBM, Spearman correlation, model serialization, and IAM profiles. | When designing or altering algorithms / pipelines. |
+| **Architecture Decisions** | [docs/DECISIONS.md](file:///home/prasannaa/Projects/fed%20trust%20credit/fedtrust-credit/docs/DECISIONS.md) | Full log of architectural decisions (`D-001` through `D-025`), including rationale for LightGBM, cosine-similarity consistency, model serialization, and IAM profiles. | When designing or altering algorithms / pipelines. |
 | **Progress Execution Log** | [docs/PROGRESS.md](file:///home/prasannaa/Projects/fed%20trust%20credit/fedtrust-credit/docs/PROGRESS.md) | Historical execution log tracking real terminal outputs, round-by-round federated training metrics, and test logs. | To verify past experiment numbers and milestones. |
 | **Phased Build Plan** | [docs/BUILD_PLAN.md](file:///home/prasannaa/Projects/fed%20trust%20credit/fedtrust-credit/docs/BUILD_PLAN.md) | The structured build plan and milestone checklist for development. | To track milestone completion. |
 | **Initial Review Report** | [docs/initial_review_report.md](file:///home/prasannaa/Projects/fed%20trust%20credit/fedtrust-credit/docs/initial_review_report.md) | Literature review, mathematical problem formulation, and foundation of the paper. | For theoretical background and paper citations. |
@@ -58,7 +58,7 @@ fedtrust-credit/
 │   └── plots/                    # ROC curves, accuracy, consistency, and fairness charts
 ├── src/                          # Application source code
 │   ├── aggregation_strategy.py   # Explanation-consistency reweighting algorithm
-│   ├── consistency_score.py      # Spearman rank correlation scoring functions
+│   ├── consistency_score.py      # Cosine-similarity consistency scoring functions
 │   ├── shap_explanation.py       # TreeSHAP feature attribution generator
 │   ├── local_training.py         # LightGBM federated client training logic
 │   ├── data_partition.py         # Non-IID data partitioner (by Grade, State, Time)
@@ -105,8 +105,8 @@ The system is deployed across a live hybrid-cloud topology:
 ### What is Completed (~75%)
 - Non-IID data partitioning on Lending Club (1.34M cleaned loans).
 - 20-round federated training simulation across all 3 variants (FedAvg, Ours, Centralized).
-- TreeSHAP vector calculation and pairwise Spearman rank correlation consistency reweighting.
-- Full evaluation metrics (Accuracy: 85.34%, AUC: 0.6574, Consistency: 0.8141, +0.03% communication overhead).
+- TreeSHAP vector calculation and pairwise cosine-similarity consistency reweighting.
+- Full evaluation metrics (Accuracy: 85.34%, AUC: 0.6574, Consistency: 0.8836, +1.31% communication overhead).
 - Model serialization reducing cold-boot time from 68.3s to 0.45s (<280MB RAM).
 - FastAPI backend and interactive browser dashboard with live cloud status monitoring.
 - AWS and Azure cloud deployment with live S3, CloudWatch, and SNS integrations.

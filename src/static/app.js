@@ -184,6 +184,9 @@ function initSimulator() {
   const gainDisplay = document.getElementById("gainValueDisplay");
   const noiseSlider = document.getElementById("noiseSlider");
   const noiseDisplay = document.getElementById("noiseValueDisplay");
+  const attackSelect = document.getElementById("attackSelect");
+  const dpSlider = document.getElementById("dpEpsilonSlider");
+  const dpDisplay = document.getElementById("dpEpsilonDisplay");
   const btnRun = document.getElementById("btnRunSim");
 
   gainSlider.addEventListener("input", (e) => {
@@ -194,14 +197,25 @@ function initSimulator() {
     noiseDisplay.textContent = parseFloat(e.target.value).toFixed(2);
   });
 
+  if (dpSlider && dpDisplay) {
+    dpSlider.addEventListener("input", (e) => {
+      dpDisplay.textContent = parseFloat(e.target.value).toFixed(1);
+    });
+  }
+
   btnRun.addEventListener("click", runSimulation);
   gainSlider.addEventListener("change", runSimulation);
   noiseSlider.addEventListener("change", runSimulation);
+  if (attackSelect) attackSelect.addEventListener("change", runSimulation);
+  if (dpSlider) dpSlider.addEventListener("change", runSimulation);
 }
 
 async function runSimulation() {
   const gain = parseFloat(document.getElementById("gainSlider").value);
   const noise = parseFloat(document.getElementById("noiseSlider").value);
+  const attack = document.getElementById("attackSelect")?.value || "none";
+  const dpRaw = document.getElementById("dpEpsilonSlider")?.value;
+  const dpEpsilon = dpRaw ? parseFloat(dpRaw) : null;
 
   try {
     const res = await fetch("/api/federated/simulate-round", {
@@ -211,6 +225,8 @@ async function runSimulation() {
         consistency_gain: gain,
         correlation_noise: noise,
         client_sizes: [627716, 287686, 81060],
+        attack_mode: attack,
+        dp_epsilon: dpEpsilon,
       })
     });
 
@@ -292,16 +308,19 @@ const PERSONA_PRESETS = {
     loan_amnt: 8000, term: 36, int_rate: 6.5, grade: "A",
     annual_inc: 120000, dti: 8.5, home_ownership: "MORTGAGE",
     purpose: "debt_consolidation", revol_util: 12, total_acc: 22,
+    open_acc: 12, pub_rec: 0, delinq_2yrs: 0,
   },
   balanced: {
     loan_amnt: 12000, term: 36, int_rate: 11.0, grade: "B",
     annual_inc: 75000, dti: 17.0, home_ownership: "MORTGAGE",
     purpose: "credit_card", revol_util: 35, total_acc: 14,
+    open_acc: 8, pub_rec: 0, delinq_2yrs: 0,
   },
   subprime: {
     loan_amnt: 35000, term: 60, int_rate: 28.5, grade: "G",
     annual_inc: 28000, dti: 45.0, home_ownership: "RENT",
     purpose: "debt_consolidation", revol_util: 95, total_acc: 8,
+    open_acc: 4, pub_rec: 1, delinq_2yrs: 2,
   }
 };
 
@@ -323,6 +342,9 @@ function initRiskForm() {
       document.getElementById("purposeSelect").value = p.purpose;
       document.getElementById("revolUtil").value     = p.revol_util || 30;
       document.getElementById("totalAcc").value      = p.total_acc || 18;
+      document.getElementById("openAcc").value       = p.open_acc ?? 10;
+      document.getElementById("pubRec").value        = p.pub_rec ?? 0;
+      document.getElementById("delinq2yrs").value    = p.delinq_2yrs ?? 0;
       evaluateLoanRisk();
     }
   });
@@ -350,6 +372,9 @@ async function evaluateLoanRisk() {
     addr_state:     document.getElementById("addrState")?.value || "NY",
     revol_util:     parseFloat(document.getElementById("revolUtil")?.value || 30),
     total_acc:      parseInt(document.getElementById("totalAcc")?.value || 18),
+    open_acc:       parseInt(document.getElementById("openAcc")?.value || 10),
+    pub_rec:        parseInt(document.getElementById("pubRec")?.value || 0),
+    delinq_2yrs:    parseInt(document.getElementById("delinq2yrs")?.value || 0),
   };
 
   try {
