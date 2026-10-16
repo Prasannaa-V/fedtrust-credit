@@ -111,15 +111,17 @@ def run_federated(parts, rounds=10, gain=1.0):
     sizes = [len(splits[c][0]) for c in ["client_1", "client_2", "client_3"]]
     glob = 0.0
     history = []
+    last_models = {}
     for rnd in range(rounds):
         probs, mets, imps = [], [], []
         for cid in ["client_1", "client_2", "client_3"]:
             X_tr, X_te, y_tr, y_te = splits[cid]
-            p, m, imp, _ = train_eval(X_tr, y_tr, X_te, y_te,
-                                      init_score=glob if rnd else None)
+            p, m, imp, model = train_eval(X_tr, y_tr, X_te, y_te,
+                                          init_score=glob if rnd else None)
             probs.append(p.astype(np.float32))
             mets.append(m)
             imps.append(imp.astype(np.float32))
+            last_models[cid] = model
         if gain == 0.0:
             glob = float(np.average([np.mean(p) for p in probs],
                                     weights=sizes))
@@ -137,21 +139,21 @@ def run_federated(parts, rounds=10, gain=1.0):
     # final eval on pooled test
     X_te_all = pd.concat([splits[c][1] for c in splits])
     y_te_all = pd.concat([splits[c][3] for c in splits])
-    # retrain quick global proxy: average of client probs on test
+    # Variant-aware per-client eval: use each variant's own final-round
+    # federated models on their home test splits (differs by gain path).
     test_probs = []
     per_client = []
     for cid in ["client_1", "client_2", "client_3"]:
         X_tr, X_te, y_tr, y_te = splits[cid]
-        m = lgb.LGBMClassifier(**LGB_PARAMS)
-        m.fit(X_tr, y_tr)
-        prob_te = m.predict_proba(X_te)[:, 1]
+        model = last_models[cid]
+        prob_te = model.predict_proba(X_te)[:, 1]
         pred_te = (prob_te >= 0.5).astype(int)
         per_client.append({"client_id": cid,
                            "acc": float(accuracy_score(y_te, pred_te)),
                            "auc": float(roc_auc_score(y_te, prob_te)),
                            "f1": float(f1_score(y_te, pred_te,
                                                 zero_division=0))})
-        test_probs.append(m.predict_proba(X_te_all)[:, 1])
+        test_probs.append(model.predict_proba(X_te_all)[:, 1])
     final_prob = np.average(test_probs, axis=0,
                             weights=[len(splits[c][0]) for c in splits])
     final_pred = (final_prob >= 0.5).astype(int)

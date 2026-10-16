@@ -1,0 +1,1169 @@
+{
+  "attacks": {
+    "label_flip": {
+      "fedavg": [
+        {
+          "round": 1,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769156,
+          "global_consistency": 0.208429,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 2,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768267,
+          "global_consistency": 0.206665,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 3,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768533,
+          "global_consistency": 0.20536,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 4,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768178,
+          "global_consistency": 0.190875,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 5,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768267,
+          "global_consistency": 0.19967,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 6,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768267,
+          "global_consistency": 0.19485,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 7,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768444,
+          "global_consistency": 0.195975,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 8,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768622,
+          "global_consistency": 0.198948,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 9,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768178,
+          "global_consistency": 0.196674,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 10,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768267,
+          "global_consistency": 0.200469,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        }
+      ],
+      "ours": [
+        {
+          "round": 1,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769156,
+          "global_consistency": 0.208429,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.27584,
+          "weights": [
+            0.36208,
+            0.36208,
+            0.27584
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 2,
+          "gain": 1.0,
+          "pooled_accuracy": 0.767911,
+          "global_consistency": 0.203324,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.277011,
+          "weights": [
+            0.361495,
+            0.361495,
+            0.277011
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 3,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768444,
+          "global_consistency": 0.200804,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.277592,
+          "weights": [
+            0.361204,
+            0.361204,
+            0.277592
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 4,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768,
+          "global_consistency": 0.204706,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.276693,
+          "weights": [
+            0.361654,
+            0.361654,
+            0.276693
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 5,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768267,
+          "global_consistency": 0.196618,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.278563,
+          "weights": [
+            0.360719,
+            0.360719,
+            0.278563
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 6,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768089,
+          "global_consistency": 0.201277,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.277482,
+          "weights": [
+            0.361259,
+            0.361259,
+            0.277482
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 7,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768622,
+          "global_consistency": 0.19895,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.278021,
+          "weights": [
+            0.36099,
+            0.36099,
+            0.278021
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 8,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768178,
+          "global_consistency": 0.196674,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.27855,
+          "weights": [
+            0.360725,
+            0.360725,
+            0.27855
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 9,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768267,
+          "global_consistency": 0.200468,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.277669,
+          "weights": [
+            0.361165,
+            0.361165,
+            0.277669
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 10,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768089,
+          "global_consistency": 0.203697,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.276925,
+          "weights": [
+            0.361538,
+            0.361538,
+            0.276925
+          ],
+          "flagged": [
+            false,
+            false,
+            false
+          ],
+          "defense": "update-norm"
+        }
+      ]
+    },
+    "weight_poison": {
+      "fedavg": [
+        {
+          "round": 1,
+          "gain": 0.0,
+          "pooled_accuracy": 0.770133,
+          "global_consistency": 0.652686,
+          "attacker_agreement": 0.666386,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 2,
+          "gain": 0.0,
+          "pooled_accuracy": 0.7696,
+          "global_consistency": 0.634219,
+          "attacker_agreement": 0.650949,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 3,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769244,
+          "global_consistency": 0.623794,
+          "attacker_agreement": 0.643221,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 4,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769689,
+          "global_consistency": 0.633335,
+          "attacker_agreement": 0.650981,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 5,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769156,
+          "global_consistency": 0.626102,
+          "attacker_agreement": 0.648309,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 6,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769511,
+          "global_consistency": 0.630532,
+          "attacker_agreement": 0.648334,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 7,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769867,
+          "global_consistency": 0.620885,
+          "attacker_agreement": 0.637744,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 8,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768533,
+          "global_consistency": 0.638678,
+          "attacker_agreement": 0.65408,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 9,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769511,
+          "global_consistency": 0.629596,
+          "attacker_agreement": 0.647899,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 10,
+          "gain": 0.0,
+          "pooled_accuracy": 0.7688,
+          "global_consistency": 0.624032,
+          "attacker_agreement": 0.644352,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        }
+      ],
+      "ours": [
+        {
+          "round": 1,
+          "gain": 1.0,
+          "pooled_accuracy": 0.770133,
+          "global_consistency": 0.625286,
+          "attacker_agreement": 0.666386,
+          "attacker_weight": 0.0,
+          "weights": [
+            0.497795,
+            0.502205,
+            0.0
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 2,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768978,
+          "global_consistency": 0.601403,
+          "attacker_agreement": 0.661636,
+          "attacker_weight": 0.0,
+          "weights": [
+            0.495345,
+            0.504655,
+            0.0
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 3,
+          "gain": 1.0,
+          "pooled_accuracy": 0.7688,
+          "global_consistency": 0.607279,
+          "attacker_agreement": 0.661143,
+          "attacker_weight": 0.0,
+          "weights": [
+            0.494841,
+            0.505159,
+            0.0
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 4,
+          "gain": 1.0,
+          "pooled_accuracy": 0.7688,
+          "global_consistency": 0.607279,
+          "attacker_agreement": 0.661143,
+          "attacker_weight": 0.0,
+          "weights": [
+            0.494841,
+            0.505159,
+            0.0
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 5,
+          "gain": 1.0,
+          "pooled_accuracy": 0.7688,
+          "global_consistency": 0.607279,
+          "attacker_agreement": 0.661143,
+          "attacker_weight": 0.0,
+          "weights": [
+            0.494841,
+            0.505159,
+            0.0
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 6,
+          "gain": 1.0,
+          "pooled_accuracy": 0.7688,
+          "global_consistency": 0.607279,
+          "attacker_agreement": 0.661097,
+          "attacker_weight": 0.0,
+          "weights": [
+            0.494824,
+            0.505176,
+            0.0
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 7,
+          "gain": 1.0,
+          "pooled_accuracy": 0.7688,
+          "global_consistency": 0.607279,
+          "attacker_agreement": 0.661143,
+          "attacker_weight": 0.0,
+          "weights": [
+            0.494841,
+            0.505159,
+            0.0
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 8,
+          "gain": 1.0,
+          "pooled_accuracy": 0.7688,
+          "global_consistency": 0.607279,
+          "attacker_agreement": 0.661143,
+          "attacker_weight": 0.0,
+          "weights": [
+            0.494841,
+            0.505159,
+            0.0
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 9,
+          "gain": 1.0,
+          "pooled_accuracy": 0.7688,
+          "global_consistency": 0.607279,
+          "attacker_agreement": 0.661143,
+          "attacker_weight": 0.0,
+          "weights": [
+            0.494841,
+            0.505159,
+            0.0
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        },
+        {
+          "round": 10,
+          "gain": 1.0,
+          "pooled_accuracy": 0.7688,
+          "global_consistency": 0.607279,
+          "attacker_agreement": 0.661143,
+          "attacker_weight": 0.0,
+          "weights": [
+            0.494841,
+            0.505159,
+            0.0
+          ],
+          "flagged": [
+            false,
+            false,
+            true
+          ],
+          "defense": "update-norm"
+        }
+      ]
+    }
+  },
+  "rounds": 10,
+  "flip_frac": 1.0,
+  "poison_scale": 2.0,
+  "max_train": 15000,
+  "n_estimators": 50,
+  "defense": "update-norm",
+  "attack": "label_flip",
+  "variants": {
+    "fedavg": [
+      {
+        "round": 1,
+        "gain": 0.0,
+        "pooled_accuracy": 0.769156,
+        "global_consistency": 0.208429,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 2,
+        "gain": 0.0,
+        "pooled_accuracy": 0.768267,
+        "global_consistency": 0.206665,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 3,
+        "gain": 0.0,
+        "pooled_accuracy": 0.768533,
+        "global_consistency": 0.20536,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 4,
+        "gain": 0.0,
+        "pooled_accuracy": 0.768178,
+        "global_consistency": 0.190875,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 5,
+        "gain": 0.0,
+        "pooled_accuracy": 0.768267,
+        "global_consistency": 0.19967,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 6,
+        "gain": 0.0,
+        "pooled_accuracy": 0.768267,
+        "global_consistency": 0.19485,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 7,
+        "gain": 0.0,
+        "pooled_accuracy": 0.768444,
+        "global_consistency": 0.195975,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 8,
+        "gain": 0.0,
+        "pooled_accuracy": 0.768622,
+        "global_consistency": 0.198948,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 9,
+        "gain": 0.0,
+        "pooled_accuracy": 0.768178,
+        "global_consistency": 0.196674,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 10,
+        "gain": 0.0,
+        "pooled_accuracy": 0.768267,
+        "global_consistency": 0.200469,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      }
+    ],
+    "ours": [
+      {
+        "round": 1,
+        "gain": 1.0,
+        "pooled_accuracy": 0.769156,
+        "global_consistency": 0.208429,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.27584,
+        "weights": [
+          0.36208,
+          0.36208,
+          0.27584
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 2,
+        "gain": 1.0,
+        "pooled_accuracy": 0.767911,
+        "global_consistency": 0.203324,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.277011,
+        "weights": [
+          0.361495,
+          0.361495,
+          0.277011
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 3,
+        "gain": 1.0,
+        "pooled_accuracy": 0.768444,
+        "global_consistency": 0.200804,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.277592,
+        "weights": [
+          0.361204,
+          0.361204,
+          0.277592
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 4,
+        "gain": 1.0,
+        "pooled_accuracy": 0.768,
+        "global_consistency": 0.204706,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.276693,
+        "weights": [
+          0.361654,
+          0.361654,
+          0.276693
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 5,
+        "gain": 1.0,
+        "pooled_accuracy": 0.768267,
+        "global_consistency": 0.196618,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.278563,
+        "weights": [
+          0.360719,
+          0.360719,
+          0.278563
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 6,
+        "gain": 1.0,
+        "pooled_accuracy": 0.768089,
+        "global_consistency": 0.201277,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.277482,
+        "weights": [
+          0.361259,
+          0.361259,
+          0.277482
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 7,
+        "gain": 1.0,
+        "pooled_accuracy": 0.768622,
+        "global_consistency": 0.19895,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.278021,
+        "weights": [
+          0.36099,
+          0.36099,
+          0.278021
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 8,
+        "gain": 1.0,
+        "pooled_accuracy": 0.768178,
+        "global_consistency": 0.196674,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.27855,
+        "weights": [
+          0.360725,
+          0.360725,
+          0.27855
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 9,
+        "gain": 1.0,
+        "pooled_accuracy": 0.768267,
+        "global_consistency": 0.200468,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.277669,
+        "weights": [
+          0.361165,
+          0.361165,
+          0.277669
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      },
+      {
+        "round": 10,
+        "gain": 1.0,
+        "pooled_accuracy": 0.768089,
+        "global_consistency": 0.203697,
+        "attacker_agreement": 0.0,
+        "attacker_weight": 0.276925,
+        "weights": [
+          0.361538,
+          0.361538,
+          0.276925
+        ],
+        "flagged": [
+          false,
+          false,
+          false
+        ],
+        "defense": "update-norm"
+      }
+    ]
+  }
+}

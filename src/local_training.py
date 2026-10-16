@@ -108,6 +108,11 @@ class FederatedClient:
         ``sigma = C * sqrt(2*ln(1.25/delta)) / epsilon``.
         ``dp_epsilon=None`` (default) disables noise and preserves the
         exact pre-DP code path.
+
+        Explanation privacy (optional): ``config={"dp_shap_epsilon": eps}``
+        L2-clips the mean-absolute SHAP vector to ``dp_shap_clip``
+        (default 1.0) and perturbs it with the same Gaussian calibration
+        under its own budget. ``None`` (default) leaves SHAP exact.
         """
         config = config or {}
         self.set_parameters(global_params)
@@ -132,8 +137,26 @@ class FederatedClient:
         )
         self._is_fitted = True
 
-        # SHAP vector (D-006, D-010)
+        # SHAP vector (D-006, D-010), optionally DP-noised (own budget)
         shap_vec = compute_shap_vector(self.model, self.X_train)
+        shap_dp = {}
+        shap_eps = config.get("dp_shap_epsilon")
+        if shap_eps is not None:
+            shap_delta = float(config.get("dp_delta", 1e-5))
+            shap_clip = float(config.get("dp_shap_clip", 1.0))
+            shap_vec = shap_vec.astype(np.float64)
+            snorm = float(np.linalg.norm(shap_vec))
+            if snorm > shap_clip and snorm > 0:
+                shap_vec = shap_vec * (shap_clip / snorm)
+            shap_sigma = (shap_clip * np.sqrt(2.0 * np.log(1.25 / shap_delta))
+                          / float(shap_eps))
+            shap_noise = np.random.RandomState(
+                int(config.get("dp_seed", 42)) + 1000)
+            shap_vec = (shap_vec + shap_noise.normal(0.0, shap_sigma,
+                                                     size=shap_vec.shape)
+                        ).astype(np.float32)
+            shap_dp = {"dp_shap_sigma": float(shap_sigma),
+                       "dp_shap_norm": float(np.linalg.norm(shap_vec))}
 
         # Metrics with init_score offset applied
         y_prob = self._predict_prob(self.X_test, self._current_init_score)
@@ -194,6 +217,7 @@ class FederatedClient:
                 "shap_vector": shap_vec.tolist(),
                 "n_features":  self.n_features,
                 **dp_diagnostics,
+                **shap_dp,
             },
         )
 

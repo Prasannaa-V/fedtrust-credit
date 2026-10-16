@@ -163,9 +163,24 @@ def main():
 
     with open(OUT_DIR / "dp_sweep.json", "w") as f:
         json.dump({"delta": args.delta, "clip": args.clip,
-                   "rounds": args.rounds, "rows": rows}, f, indent=2)
+                   "rounds": args.rounds, "rows": rows,
+                   "composed_budgets": composed_budgets(args, rows)}, f, indent=2)
     print(f"[dp] results -> {OUT_DIR / 'dp_sweep.json'}")
     save_plot(rows, PLOTS_DIR / "differential_privacy_tradeoff.png")
+
+
+def composed_budgets(args, rows):
+    """RDP-composed total budgets: one release per client per round."""
+    from dp_accountant import total_epsilon
+    out = []
+    for r in rows:
+        if r["epsilon"] is None:
+            continue
+        n = args.rounds * 3
+        out.append({"epsilon": r["epsilon"],
+                    **total_epsilon(r["epsilon"], args.delta, n,
+                                    clip=args.clip)})
+    return out
 
 
 if __name__ == "__main__":

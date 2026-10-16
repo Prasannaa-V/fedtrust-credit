@@ -402,7 +402,7 @@ tests/test_service_api.py ........        [100%]
 **What's next**:
 1. ~~Fill Byzantine/DP/German tables~~ DONE (all grounded, report §§3-5).
 2. ~~DP sweep~~ DONE (clean 0.77337 → eps0.5 0.77192, monotonic).
-3. Final `pytest`: **20/20 passed in 5.65s** (13 original + 7 `test_robustness_privacy.py`). Service boots via `models/*.joblib`.
+3. Final `pytest`: **25/25 passed in 4.03s** (13 original + 12 `test_robustness_privacy.py`). Service boots via `models/*.joblib`.
 4. `git add` + `git push` (pending user confirm).
 
 ---
@@ -414,6 +414,7 @@ tests/test_service_api.py ........        [100%]
 - `src/byzantine_attack.py --attacks none,label_flip,weight_poison --rounds 10 --max-train 15000` — clean fedavg 0.7693; label_flip fedavg 0.7683 (−0.0010) vs ours 0.7681, w₃ 0.333→0.277, a₃ 0.646→0.0; weight_poison invisible to SHAP (a₃≈0.64, acc unchanged).
 - `src/run_differential_privacy.py --rounds 3 --epsilons 0.5,1,5,10` — clean 0.77337 → ε0.5 0.77192; mean update L2 13–28, σ 0.484–9.69; sensitivity inset added to plot.
 - `src/monitoring_snapshot.py` — 24 latency samples (p50 0.026s, p95 0.052s), 12 predictions; snapshot PNG (157KB) + `results/monitoring/api_latency.json`.
+- Session-13 improvements: RDP accountant (`dp_accountant.py`, composed ε table), SHAP DP noise opt-in, update-norm defense (weight-poison flagged `[F,F,T]`, w₃→0.0), variant-aware German fairness, AWS screenshot runbook.
 - `pytest tests/test_robustness_privacy.py -q -k "sensitivity or latency or histogram or divergent or epsilon_none"` — 5 passed.
 
 **Code**: `update_l2_norm`/`dp_sigma` diagnostics in `local_training.py:fit()`; `APILatencySeconds` telemetry in `service.py` + `aws_integrations.py`; histogram (`view: bar`, p95) widget in Terraform + deploy script; disjoint German partition + history/fairness logging; multi-attack Byzantine runner + clean-comparison plot.

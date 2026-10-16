@@ -81,6 +81,18 @@ def test_dp_reports_sensitivity_diagnostics():
     assert np.isfinite(m["dp_noise_l2_norm"])
 
 
+def test_dp_shap_noise_opt_in_only():
+    c = _tiny_client()
+    _, _, m_clean = c.fit([np.array([0.5])], config={"round": 1})
+    assert "dp_shap_sigma" not in m_clean  # default path untouched
+    c2 = _tiny_client()
+    _, _, m_noisy = c2.fit([np.array([0.5])], config={
+        "round": 1, "dp_shap_epsilon": 1.0, "dp_delta": 1e-5,
+        "dp_shap_clip": 1.0, "dp_seed": 7})
+    assert np.isfinite(m_noisy["dp_shap_sigma"])
+    assert np.isfinite(np.array(m_noisy["shap_vector"])).all()
+
+
 def test_latency_telemetry_noops_offline():
     from aws_integrations import AWSCloudManager
     mgr = AWSCloudManager()
@@ -98,3 +110,45 @@ def test_dashboard_latency_widget_is_histogram():
     assert len(latency) == 1
     assert latency[0]["properties"].get("view") == "bar"
     assert latency[0]["properties"].get("stat") == "p95"
+
+
+def test_rdp_gaussian_closed_form():
+    import math
+    sys.path.insert(0, str(ROOT / "src"))
+    from dp_accountant import rdp_gaussian, analytic_sigma
+    # Mironov Prop. 7: RDP(2) with sigma=4.845, C=1 is 2/(2*sigma^2).
+    assert abs(rdp_gaussian(2.0, 4.8450367) - 2.0 / (2 * 4.8450367 ** 2)) < 1e-9
+    # Analytic sigma must match the FederatedClient calibration.
+    assert abs(analytic_sigma(1.0, 1.0, 1e-5)
+               - math.sqrt(2.0 * math.log(1.25 / 1e-5))) < 1e-9
+
+
+def test_composed_budget_monotonic():
+    sys.path.insert(0, str(ROOT / "src"))
+    from dp_accountant import total_epsilon
+    small = total_epsilon(10.0, 1e-5, 9)["composed_epsilon"]
+    big = total_epsilon(0.5, 1e-5, 9)["composed_epsilon"]
+    more = total_epsilon(1.0, 1e-5, 18)["composed_epsilon"]
+    base = total_epsilon(1.0, 1e-5, 9)["composed_epsilon"]
+    assert big < base < small  # less noise per release -> larger total
+    assert more > base  # more releases -> larger total
+
+
+def test_update_norm_filter_flags_gross_poison():
+    sys.path.insert(0, str(ROOT / "src"))
+    from byzantine_defense import flag_updates
+    rng = np.random.RandomState(0)
+    honest = [rng.uniform(0, 1, size=500).astype(np.float32) for _ in range(2)]
+    poisoned = (honest[0] + rng.normal(0, 2.0, size=500)).astype(np.float32)
+    flags = flag_updates([honest[0], honest[1], poisoned])
+    assert flags == [False, False, True]
+
+
+def test_update_norm_filter_clean_passes():
+    sys.path.insert(0, str(ROOT / "src"))
+    from byzantine_defense import flag_updates
+    rng = np.random.RandomState(1)
+    base = rng.uniform(0, 1, size=500).astype(np.float32)
+    vecs = [np.maximum(0, base + rng.normal(0, 0.02, size=500))
+            for _ in range(3)]
+    assert flag_updates(vecs) == [False, False, False]

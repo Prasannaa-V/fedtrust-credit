@@ -82,8 +82,14 @@ def build_poisoned_clients(partitions, shared_cols, attack="label_flip",
     return clients, sizes
 
 
-def run_variant(clients, sizes, num_rounds, gain, attack, poison_scale):
-    """Run one poisoned federation; return per-round records."""
+def run_variant(clients, sizes, num_rounds, gain, attack, poison_scale,
+                defense=None):
+    """Run one poisoned federation; return per-round records.
+
+    defense="update-norm" (ours variant only): exclude clients flagged by
+    byzantine_defense.flag_updates from aggregation that round.
+    """
+    from byzantine_defense import flag_updates
     global_params = [np.array([0.5], dtype=np.float32)]
     records = []
     for rnd in range(1, num_rounds + 1):
@@ -101,6 +107,13 @@ def run_variant(clients, sizes, num_rounds, gain, attack, poison_scale):
             metrics_list.append({"num_examples": n, **m})
             if m.get("shap_vector"):
                 shap_vecs.append(np.array(m["shap_vector"], dtype=np.float32))
+        flagged = flag_updates(params)
+        excluded = [bool(f) for f in flagged] if (
+            defense == "update-norm" and gain != 0.0) else [False] * len(params)
+        keep = [i for i in range(len(params)) if not excluded[i]]
+        eff_weights = [params[i] for i in keep]
+        eff_sizes = [sizes[i] for i in keep]
+        eff_shap = [shap_vecs[i] for i in keep] if shap_vecs else []
         if gain == 0.0:
             agg = fedavg_aggregate(params, sizes)
             cons = float(explanation_consistency_score(shap_vecs)) if shap_vecs else 0.0
@@ -109,14 +122,19 @@ def run_variant(clients, sizes, num_rounds, gain, attack, poison_scale):
             adj_w = [s / total for s in sizes]
         else:
             agg, cons = explanation_consistency_aware_aggregate(
-                client_weights=params, client_sizes=sizes,
-                shap_vectors=shap_vecs, consistency_gain=gain)
+                client_weights=eff_weights, client_sizes=eff_sizes,
+                shap_vectors=eff_shap, consistency_gain=gain)
             agreements = per_client_agreement(shap_vecs)
             total = sum(sizes)
             base = [s / total for s in sizes]
             raw = [base[i] * (1.0 + gain * agreements[i]) for i in range(3)]
             s = sum(raw)
             adj_w = [w / s for w in raw]
+            for i in range(3):
+                if excluded[i]:
+                    adj_w[i] = 0.0
+            s2 = sum(adj_w)
+            adj_w = [w / s2 for w in adj_w] if s2 > 0 else adj_w
         global_params = [agg]
         total_n = sum(m["num_examples"] for m in metrics_list)
         pooled_acc = sum(m["accuracy"] * m["num_examples"]
@@ -129,6 +147,8 @@ def run_variant(clients, sizes, num_rounds, gain, attack, poison_scale):
             "attacker_agreement": round(float(agreements[2]), 6),
             "attacker_weight": round(float(adj_w[2]), 6),
             "weights": [round(float(w), 6) for w in adj_w],
+            "flagged": flagged,
+            "defense": defense,
         })
         print(f"[rnd {rnd:2d}] gain={gain} acc={pooled_acc:.4f} "
               f"cons={cons:.4f} a3={agreements[2]:.4f} w3={adj_w[2]:.4f}")
@@ -206,6 +226,11 @@ def main():
     ap.add_argument("--flip-frac", type=float, default=1.0)
     ap.add_argument("--poison-scale", type=float, default=2.0)
     ap.add_argument("--gain", type=float, default=1.0)
+    ap.add_argument("--defense", choices=["none", "update-norm"],
+                    default="none",
+                    help="ours-variant pre-filter: exclude update-norm-flagged clients")
+    ap.add_argument("--tag", type=str, default="",
+                    help="suffix for output files, e.g. 'defense'")
     ap.add_argument("--max-train", type=int, default=None,
                     help="Subsample cap per client train set for fast eval")
     ap.add_argument("--n-estimators", type=int, default=None,
@@ -223,7 +248,8 @@ def main():
         else [args.attack]
     summary = {"attacks": {}, "rounds": args.rounds,
                "flip_frac": args.flip_frac, "poison_scale": args.poison_scale,
-               "max_train": args.max_train, "n_estimators": args.n_estimators}
+               "max_train": args.max_train, "n_estimators": args.n_estimators,
+               "defense": args.defense}
 
     for attack in attacks:
         summary["attacks"][attack] = {}
@@ -232,23 +258,26 @@ def main():
                 parts, shared, attack=attack,
                 flip_frac=args.flip_frac, poison_scale=args.poison_scale,
                 max_train=args.max_train, n_estimators=args.n_estimators)
-            print(f"\n=== attack={attack} variant={name} gain={gain} ===")
+            print(f"\n=== attack={attack} variant={name} gain={gain} "
+                  f"defense={args.defense} ===")
             recs = run_variant(clients, sizes, args.rounds, gain,
-                               attack, args.poison_scale)
+                               attack, args.poison_scale,
+                               defense=args.defense)
             summary["attacks"][attack][name] = recs
     # backward-compatible top-level view for the primary attack
     primary = attacks[0]
     summary.update({"attack": primary,
                     "variants": summary["attacks"][primary]})
 
-    with open(OUT_DIR / "attack_results.json", "w") as f:
+    with open(OUT_DIR / f"attack_results{args.tag and '_' + args.tag}.json", "w") as f:
         json.dump(summary, f, indent=2)
     print(f"[byzantine] results -> {OUT_DIR / 'attack_results.json'}")
+    tag = args.tag and "_" + args.tag
     save_plot(summary["variants"]["fedavg"], summary["variants"]["ours"],
-              primary, PLOTS_DIR / "byzantine_robustness.png")
+              primary, PLOTS_DIR / f"byzantine_robustness{tag}.png")
     if "none" in summary["attacks"]:
         save_clean_comparison(summary["attacks"],
-                              PLOTS_DIR / "byzantine_clean_vs_attacked.png")
+                              PLOTS_DIR / f"byzantine_clean_vs_attacked{tag}.png")
 
 
 if __name__ == "__main__":

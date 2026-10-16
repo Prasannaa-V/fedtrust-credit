@@ -119,7 +119,7 @@
 
 ### D-027: Byzantine Clean Baseline + Post-Training Poison Blindness (9.3 completion)
 **Decision**: `byzantine_attack.py` gains `--attacks none,label_flip,weight_poison` (clean FedAvg baseline under identical subsample/rounds) and `byzantine_clean_vs_attacked.png`. Finding: label-flip diverges SHAP (a₃ 0.646→0.0) and is down-weighted (w₃ 0.333→0.277) with FedAvg degrading −0.0010 vs clean; post-training weight-poison leaves SHAP/accuracy untouched, so consistency scoring is blind to it.
-**Reason**: The clean baseline is what makes the "FedAvg degrades, ours holds" comparison meaningful; the negative weight-poison result is reported rather than hidden.
+**Reason**: The clean baseline is what makes the "FedAvg degrades, ours holds" comparison meaningful; the negative weight-poison result motivated the update-norm pre-filter (`--defense update-norm`, verified in `attack_results_defense.json`).
 
 ### D-028: German Exact-Category Partition + Fairness Caveat (9.4 completion)
 **Decision**: Replaced overlapping regex bins (which degenerated to fallback thirds) with disjoint exact-match categories: `existing paid` / `critical/other existing` / `delayed+all paid+no credits` (530/293/177, defaults 31.9%/17.1%/45.8%); 20 rounds with per-round test-accuracy history and per-institution fairness spreads in `german_results.json`.
