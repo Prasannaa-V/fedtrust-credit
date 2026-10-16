@@ -14,8 +14,9 @@ WIDGETS = [
      "metric": "DefaultProbability", "period": 60, "stat": "Average"},
     {"title": "ExplanationConsistencyScore (per round)",
      "metric": "ExplanationConsistencyScore", "period": 300, "stat": "Average"},
-    {"title": "RoundLatencySeconds",
-     "metric": "RoundLatencySeconds", "period": 300, "stat": "Average"},
+    {"title": "API Latency Histogram (APILatencySeconds p95)",
+     "metric": "APILatencySeconds", "period": 300, "stat": "p95",
+     "view": "bar"},
 ]
 
 NAMESPACE = "FedTrustCredit/FL"
@@ -24,14 +25,17 @@ NAMESPACE = "FedTrustCredit/FL"
 def build_body(region):
     metric_widgets = []
     for i, w in enumerate(WIDGETS):
+        props = {
+            "title": w["title"],
+            "metrics": [[NAMESPACE, w["metric"]]],
+            "period": w["period"], "stat": w["stat"], "region": region,
+        }
+        if w.get("view"):
+            props["view"] = w["view"]
         metric_widgets.append({
             "type": "metric", "x": (i % 2) * 12, "y": (i // 2) * 6,
             "width": 12, "height": 6,
-            "properties": {
-                "title": w["title"],
-                "metrics": [[NAMESPACE, w["metric"]]],
-                "period": w["period"], "stat": w["stat"], "region": region,
-            },
+            "properties": props,
         })
     metric_widgets.append({
         "type": "alarm", "x": 12, "y": 6, "width": 12, "height": 6,

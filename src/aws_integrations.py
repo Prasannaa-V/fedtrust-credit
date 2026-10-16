@@ -157,6 +157,26 @@ class AWSCloudManager:
             print(f"[AWSCloudManager] Failed to publish SNS alert: {e}")
             return False
 
+    def log_latency_to_cloudwatch(self, endpoint: str, seconds: float) -> None:
+        """Publishes per-endpoint API latency for the latency-histogram widget."""
+        if not self.cw_client:
+            return
+        try:
+            self.cw_client.put_metric_data(
+                Namespace=self.cloudwatch_namespace,
+                MetricData=[
+                    {
+                        "MetricName": "APILatencySeconds",
+                        "Dimensions": [{"Name": "Endpoint", "Value": endpoint}],
+                        "Value": float(seconds),
+                        "Unit": "Seconds",
+                        "Timestamp": datetime.now(timezone.utc),
+                    }
+                ],
+            )
+        except Exception as e:
+            print(f"[AWSCloudManager] CloudWatch latency write failed: {e}")
+
     def log_metric_to_cloudwatch(self, metric_name: str, value: float, unit: str = "None"):
         """Publishes custom telemetry metrics to Amazon CloudWatch."""
         if not self.cw_client:

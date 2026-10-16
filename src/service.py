@@ -462,6 +462,7 @@ def simulate_federated_round(req: SimulateRoundRequest):
     sizes = req.client_sizes
     total_size = sum(sizes)
     base_weights = [s / total_size for s in sizes]
+    _sim_start = time.perf_counter()
 
     base_shap = np.array([0.34, 0.28, 0.22, 0.16, 0.12, 0.25, 0.08, 0.06], dtype=np.float32)
 
@@ -510,6 +511,8 @@ def simulate_federated_round(req: SimulateRoundRequest):
     # Cloud Telemetry: Log Explanation Consistency Score to Amazon CloudWatch
     if _AWS_MODULE_OK and cloud_manager is not None:
         cloud_manager.log_metric_to_cloudwatch("ExplanationConsistencyScore", global_cons, "None")
+        cloud_manager.log_latency_to_cloudwatch(
+            "simulate-round", time.perf_counter() - _sim_start)
 
     return {
         "consistency_gain": req.consistency_gain,
@@ -542,13 +545,16 @@ def predict_credit_risk(applicant: LoanApplicantRequest):
     and produces TreeSHAP explanations alongside multi-institution consensus evaluation.
     Publishes real-time telemetry to Amazon CloudWatch and triggers AWS SNS alert on high risk.
     """
+    _pred_start = time.perf_counter()
     res = engine.predict_and_explain(applicant.model_dump())
+    _pred_elapsed = time.perf_counter() - _pred_start
 
     # Cloud Telemetry: Log Default Probability to Amazon CloudWatch
     if "default_probability_pct" in res:
         prob = float(res["default_probability_pct"])  # already a percentage, e.g. 14.45
         if _AWS_MODULE_OK and cloud_manager is not None:
             cloud_manager.log_metric_to_cloudwatch("DefaultProbability", prob, "None")
+            cloud_manager.log_latency_to_cloudwatch("predict-risk", _pred_elapsed)
             # Trigger AWS SNS email/SMS alert if applicant is high risk (>= 35% default chance)
             if prob >= 35.0:
                 cloud_manager.publish_high_risk_sns_alert(applicant.model_dump(), prob)

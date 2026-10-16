@@ -148,6 +148,17 @@ class FederatedClient:
         )
 
         params = self.get_parameters()
+        # Weight-update sensitivity: L2 norm of (local probs − received
+        # global signal broadcast to local length). This is the quantity the
+        # DP clip bounds before noise is added.
+        try:
+            g = np.asarray(global_params[0], dtype=np.float64).ravel()
+            p0 = np.asarray(params[0], dtype=np.float64).ravel()
+            g_b = np.full_like(p0, float(np.mean(g)))
+            update_l2_norm = float(np.linalg.norm(p0 - g_b))
+        except Exception:
+            update_l2_norm = float("nan")
+        dp_diagnostics = {"update_l2_norm": update_l2_norm}
         dp_eps = config.get("dp_epsilon")
         if dp_eps is not None:
             dp_delta = float(config.get("dp_delta", 1e-5))
@@ -160,8 +171,15 @@ class FederatedClient:
                 norm = float(np.linalg.norm(v))
                 if norm > dp_clip and norm > 0:
                     v = v * (dp_clip / norm)
+                pre_noise_norm = float(np.linalg.norm(v))
                 sigma = dp_clip * np.sqrt(2.0 * np.log(1.25 / dp_delta)) / float(dp_eps)
-                v = v + rng.normal(0.0, sigma, size=v.shape)
+                noise = rng.normal(0.0, sigma, size=v.shape)
+                dp_diagnostics.update({
+                    "dp_pre_noise_norm": pre_noise_norm,
+                    "dp_sigma": float(sigma),
+                    "dp_noise_l2_norm": float(np.linalg.norm(noise)),
+                })
+                v = v + noise
                 noisy.append(v.astype(np.float32))
             params = noisy
 
@@ -175,6 +193,7 @@ class FederatedClient:
                 "f1":          f1,
                 "shap_vector": shap_vec.tolist(),
                 "n_features":  self.n_features,
+                **dp_diagnostics,
             },
         )
 

@@ -66,3 +66,35 @@ def test_simulate_round_attack_mode():
         "client_sizes": [627716, 287686, 81060],
         "attack_mode": "label_flip"}).json()
     assert attacked["global_consistency"] < honest["global_consistency"]
+
+
+def test_dp_reports_sensitivity_diagnostics():
+    import math
+    c = _tiny_client()
+    _, _, m = c.fit([np.array([0.5])], config={
+        "round": 1, "dp_epsilon": 1.0, "dp_delta": 1e-5, "dp_clip": 1.0,
+        "dp_seed": 7})
+    assert np.isfinite(m["update_l2_norm"]) and m["update_l2_norm"] >= 0
+    assert np.isfinite(m["dp_pre_noise_norm"])
+    expected_sigma = 1.0 * math.sqrt(2.0 * math.log(1.25 / 1e-5)) / 1.0
+    assert abs(m["dp_sigma"] - expected_sigma) < 1e-6
+    assert np.isfinite(m["dp_noise_l2_norm"])
+
+
+def test_latency_telemetry_noops_offline():
+    from aws_integrations import AWSCloudManager
+    mgr = AWSCloudManager()
+    # Must not raise with or without a CloudWatch client configured.
+    mgr.log_latency_to_cloudwatch("simulate-round", 0.012)
+
+
+def test_dashboard_latency_widget_is_histogram():
+    import json
+    sys.path.insert(0, str(ROOT / "src"))
+    from deploy_cloudwatch_dashboard import build_body
+    body = json.loads(build_body("us-east-1"))
+    latency = [w for w in body["widgets"]
+               if w.get("properties", {}).get("title", "").startswith("API Latency")]
+    assert len(latency) == 1
+    assert latency[0]["properties"].get("view") == "bar"
+    assert latency[0]["properties"].get("stat") == "p95"

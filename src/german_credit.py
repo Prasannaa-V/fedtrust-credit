@@ -53,28 +53,28 @@ def load_german(cache_path=None):
 
 
 def partition_by_history(X, y, hist):
-    """3 institutions split by credit_history bins (proxy for non-IID)."""
+    """3 disjoint institutions split by exact credit_history categories.
+
+    client_1 (steady payers)   = "existing paid" (n=530)
+    client_2 (risky existing)  = "critical/other existing credit" (n=293)
+    client_3 (mixed adverse)    = delayed previously + all paid + no credits (n=177)
+    Disjoint by construction (exact-match bins, D-024); sizes verified at runtime.
+    """
+    h = hist.astype(str)
     groups = {
-        "client_1": hist.str.contains("paid|allpaid", case=False, na=False),
-        "client_2": hist.str.contains("existing|delay", case=False, na=False),
-        "client_3": ~(hist.str.contains("paid|allpaid|existing|delay",
-                                        case=False, na=False)),
+        "client_1": h == "existing paid",
+        "client_2": h == "critical/other existing credit",
+        "client_3": h.isin(["delayed previously", "all paid",
+                            "no credits/all paid"]),
     }
     parts = {}
     for cid, mask in groups.items():
         m = mask.values
-        if m.sum() < 50:  # fallback to stratified thirds if bins degenerate
-            continue
+        if m.sum() < 50:
+            raise ValueError(f"[german] partition {cid} too small: {m.sum()}")
         parts[cid] = (X[m], y[m])
-    if len(parts) != 3:
-        # deterministic stratified fallback: thirds by index
-        n = len(X)
-        idx = np.arange(n)
-        parts = {
-            "client_1": (X.iloc[idx[::3]], y.iloc[idx[::3]]),
-            "client_2": (X.iloc[idx[1::3]], y.iloc[idx[1::3]]),
-            "client_3": (X.iloc[idx[2::3]], y.iloc[idx[2::3]]),
-        }
+    assert sum(len(v[0]) for v in parts.values()) == len(X), \
+        "partitions must be disjoint and cover all rows"
     return parts
 
 
@@ -82,14 +82,24 @@ def train_eval(X_tr, y_tr, X_te, y_te, init_score=None):
     m = lgb.LGBMClassifier(**LGB_PARAMS)
     m.fit(X_tr, y_tr,
           init_score=np.full(len(X_tr), init_score) if init_score else None)
-    prob = m.predict_proba(X_te)[:, 1]
-    pred = (prob >= 0.5).astype(int)
+    prob_tr = m.predict_proba(X_tr)[:, 1]
+    prob_te = m.predict_proba(X_te)[:, 1]
+    pred_te = (prob_te >= 0.5).astype(int)
     # mean-abs feature importance as cheap SHAP proxy for speed
     imp = np.abs(m.feature_importances_.astype(float))
     imp = imp / (imp.sum() + 1e-12)
-    return prob, {"acc": accuracy_score(y_te, pred),
-                  "auc": roc_auc_score(y_te, prob),
-                  "f1": f1_score(y_te, pred, zero_division=0)}, imp, m
+    return prob_tr, {"acc": accuracy_score(y_te, pred_te),
+                     "auc": roc_auc_score(y_te, prob_te),
+                     "f1": f1_score(y_te, pred_te, zero_division=0)}, \
+        imp, m
+
+
+def fairness_spread(per_client):
+    """Max-min spread of accuracy and F1 across the 3 institutions."""
+    accs = [c["acc"] for c in per_client]
+    f1s = [c["f1"] for c in per_client]
+    return {"accuracy_spread": float(max(accs) - min(accs)),
+            "f1_spread": float(max(f1s) - min(f1s))}
 
 
 def run_federated(parts, rounds=10, gain=1.0):
@@ -100,11 +110,12 @@ def run_federated(parts, rounds=10, gain=1.0):
         splits[cid] = (X_tr, X_te, y_tr, y_te)
     sizes = [len(splits[c][0]) for c in ["client_1", "client_2", "client_3"]]
     glob = 0.0
+    history = []
     for rnd in range(rounds):
         probs, mets, imps = [], [], []
         for cid in ["client_1", "client_2", "client_3"]:
             X_tr, X_te, y_tr, y_te = splits[cid]
-            p, m, imp, _ = train_eval(X_tr, y_tr, X_tr, y_tr,
+            p, m, imp, _ = train_eval(X_tr, y_tr, X_te, y_te,
                                       init_score=glob if rnd else None)
             probs.append(p.astype(np.float32))
             mets.append(m)
@@ -117,15 +128,29 @@ def run_federated(parts, rounds=10, gain=1.0):
             agg, cons = explanation_consistency_aware_aggregate(
                 probs, sizes, imps, consistency_gain=gain)
             glob = float(agg[0])
+        total_n = sum(len(splits[c][1]) for c in splits)
+        pooled_acc = sum(mets[i]["acc"] * len(splits[c][1])
+                         for i, c in enumerate(splits)) / total_n
+        history.append({"round": rnd + 1,
+                        "pooled_accuracy": float(pooled_acc),
+                        "consistency": float(cons)})
     # final eval on pooled test
     X_te_all = pd.concat([splits[c][1] for c in splits])
     y_te_all = pd.concat([splits[c][3] for c in splits])
     # retrain quick global proxy: average of client probs on test
     test_probs = []
+    per_client = []
     for cid in ["client_1", "client_2", "client_3"]:
-        X_tr, _, y_tr, _ = splits[cid]
+        X_tr, X_te, y_tr, y_te = splits[cid]
         m = lgb.LGBMClassifier(**LGB_PARAMS)
         m.fit(X_tr, y_tr)
+        prob_te = m.predict_proba(X_te)[:, 1]
+        pred_te = (prob_te >= 0.5).astype(int)
+        per_client.append({"client_id": cid,
+                           "acc": float(accuracy_score(y_te, pred_te)),
+                           "auc": float(roc_auc_score(y_te, prob_te)),
+                           "f1": float(f1_score(y_te, pred_te,
+                                                zero_division=0))})
         test_probs.append(m.predict_proba(X_te_all)[:, 1])
     final_prob = np.average(test_probs, axis=0,
                             weights=[len(splits[c][0]) for c in splits])
@@ -134,13 +159,16 @@ def run_federated(parts, rounds=10, gain=1.0):
             "auc": float(roc_auc_score(y_te_all, final_prob)),
             "f1": float(f1_score(y_te_all, final_pred, zero_division=0)),
             "consistency": float(cons),
-            "sizes": sizes}
+            "sizes": sizes,
+            "per_client": per_client,
+            "fairness": fairness_spread(per_client),
+            "history": history}
 
 
 def main():
     import argparse
     ap = argparse.ArgumentParser()
-    ap.add_argument("--rounds", type=int, default=10)
+    ap.add_argument("--rounds", type=int, default=20)
     args = ap.parse_args()
     print("[german] loading UCI German Credit...")
     X, y, hist = load_german()
@@ -185,15 +213,25 @@ def main():
     labels = ["accuracy", "auc", "consistency"]
     x = np.arange(len(labels))
     w = 0.25
-    fig, ax = plt.subplots(figsize=(8, 4.5))
-    ax.bar(x - w, [centralized[k] for k in labels], w, label="Centralized")
-    ax.bar(x, [fedavg[k] for k in labels], w, label="FedAvg")
-    ax.bar(x + w, [ours[k] for k in labels], w, label="Ours")
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels)
-    ax.set_title(f"German Credit generalization ({args.rounds} rounds, n=1000)")
-    ax.legend()
-    ax.grid(axis="y", alpha=0.3)
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))
+    axes[0].bar(x - w, [centralized[k] for k in labels], w, label="Centralized")
+    axes[0].bar(x, [fedavg[k] for k in labels], w, label="FedAvg")
+    axes[0].bar(x + w, [ours[k] for k in labels], w, label="Ours")
+    axes[0].set_xticks(x)
+    axes[0].set_xticklabels(labels)
+    axes[0].set_title(f"German Credit final metrics ({args.rounds} rounds, n=1000)")
+    axes[0].legend()
+    axes[0].grid(axis="y", alpha=0.3)
+    for recs, style, lab in [(fedavg["history"], "o-", "FedAvg"),
+                             (ours["history"], "s-", "Ours")]:
+        axes[1].plot([h["round"] for h in recs],
+                     [h["pooled_accuracy"] for h in recs],
+                     style, label=lab)
+    axes[1].set_xlabel("Federated round")
+    axes[1].set_ylabel("Pooled test accuracy")
+    axes[1].set_title("Per-round accuracy trajectory (test splits)")
+    axes[1].legend()
+    axes[1].grid(alpha=0.3)
     fig.tight_layout()
     PLOTS_DIR.mkdir(parents=True, exist_ok=True)
     fig.savefig(PLOTS_DIR / "german_credit_benchmark.png", dpi=150)

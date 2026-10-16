@@ -50,6 +50,7 @@ def run_dp_simulation(partitions, shared_cols, epsilon, delta, clip,
         sizes.append(len(X_tr))
     global_params = [np.array([0.5], dtype=np.float32)]
     acc_hist = []
+    sens_hist = []
     for rnd in range(1, num_rounds + 1):
         params, metrics_list, shap_vecs = [], [], []
         for i, c in enumerate(clients):
@@ -71,9 +72,19 @@ def run_dp_simulation(partitions, shared_cols, epsilon, delta, clip,
         pooled_auc = sum(m["auc"] * m["num_examples"]
                          for m in metrics_list) / total_n
         acc_hist.append(float(pooled_acc))
+        norms = [float(m["update_l2_norm"]) for m in metrics_list
+                 if np.isfinite(m.get("update_l2_norm", np.nan))]
+        sigmas = [float(m["dp_sigma"]) for m in metrics_list
+                  if "dp_sigma" in m]
+        sens_hist.append({
+            "round": rnd,
+            "mean_update_l2": float(np.mean(norms)) if norms else None,
+            "max_update_l2": float(np.max(norms)) if norms else None,
+            "sigma": sigmas[0] if sigmas else 0.0,
+        })
         print(f"  [eps={epsilon} rnd {rnd}/{num_rounds}] "
               f"acc={pooled_acc:.4f} auc={pooled_auc:.4f} cons={cons:.4f}")
-    return acc_hist
+    return acc_hist, sens_hist
 
 
 def save_plot(rows, out_path):
@@ -97,6 +108,17 @@ def save_plot(rows, out_path):
     ax.set_ylabel("Pooled accuracy")
     ax.set_title("Differential privacy vs utility (delta=1e-5, Gaussian mechanism)")
     ax.grid(alpha=0.3)
+    # Panel 2: per-round mean update L2 sensitivity (clean run) + sigma per epsilon
+    sens = rows[0].get("sensitivity", [])
+    if sens:
+        ax2 = ax.inset_axes([0.08, 0.52, 0.38, 0.38])
+        ax2.plot([s["round"] for s in sens],
+                 [s["mean_update_l2"] for s in sens], marker="o", ms=3)
+        ax2.set_xlabel("round", fontsize=7)
+        ax2.set_ylabel("mean update L2", fontsize=7)
+        ax2.set_title("Update sensitivity (clean)", fontsize=8)
+        ax2.tick_params(labelsize=6)
+        ax2.grid(alpha=0.3)
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150)
@@ -127,16 +149,17 @@ def main():
     rows = []
     # clean (no-DP) reference, short run
     print("\n=== epsilon=None (no DP clean reference) ===")
-    hist = run_dp_simulation(parts, shared, None, args.delta, args.clip,
-                             args.rounds, max_train=args.max_train)
+    hist, sens = run_dp_simulation(parts, shared, None, args.delta, args.clip,
+                                   args.rounds, max_train=args.max_train)
     rows.append({"epsilon": None, "final_accuracy": hist[-1],
-                 "accuracy_traj": hist})
+                 "accuracy_traj": hist, "sensitivity": sens})
     for eps in eps_list:
         print(f"\n=== epsilon={eps} ===")
-        hist = run_dp_simulation(parts, shared, eps, args.delta, args.clip,
-                                 args.rounds, max_train=args.max_train)
+        hist, sens = run_dp_simulation(parts, shared, eps, args.delta,
+                                       args.clip, args.rounds,
+                                       max_train=args.max_train)
         rows.append({"epsilon": eps, "final_accuracy": hist[-1],
-                     "accuracy_traj": hist})
+                     "accuracy_traj": hist, "sensitivity": sens})
 
     with open(OUT_DIR / "dp_sweep.json", "w") as f:
         json.dump({"delta": args.delta, "clip": args.clip,

@@ -1,16 +1,818 @@
 {
-  "attack": "label_flip",
-  "rounds": 5,
+  "attacks": {
+    "none": {
+      "fedavg": [
+        {
+          "round": 1,
+          "gain": 0.0,
+          "pooled_accuracy": 0.770133,
+          "global_consistency": 0.652686,
+          "attacker_agreement": 0.666386,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 2,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768889,
+          "global_consistency": 0.636694,
+          "attacker_agreement": 0.653075,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 3,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769333,
+          "global_consistency": 0.627689,
+          "attacker_agreement": 0.646054,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 4,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769333,
+          "global_consistency": 0.627687,
+          "attacker_agreement": 0.646052,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 5,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769333,
+          "global_consistency": 0.627614,
+          "attacker_agreement": 0.645943,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 6,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769333,
+          "global_consistency": 0.627614,
+          "attacker_agreement": 0.645943,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 7,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769333,
+          "global_consistency": 0.627686,
+          "attacker_agreement": 0.646052,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 8,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769333,
+          "global_consistency": 0.627614,
+          "attacker_agreement": 0.645943,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 9,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769333,
+          "global_consistency": 0.627614,
+          "attacker_agreement": 0.645943,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 10,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769333,
+          "global_consistency": 0.627614,
+          "attacker_agreement": 0.645943,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        }
+      ],
+      "ours": [
+        {
+          "round": 1,
+          "gain": 1.0,
+          "pooled_accuracy": 0.770133,
+          "global_consistency": 0.652686,
+          "attacker_agreement": 0.666386,
+          "attacker_weight": 0.336097,
+          "weights": [
+            0.330488,
+            0.333415,
+            0.336097
+          ]
+        },
+        {
+          "round": 2,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769067,
+          "global_consistency": 0.638846,
+          "attacker_agreement": 0.651375,
+          "attacker_weight": 0.335882,
+          "weights": [
+            0.328024,
+            0.336094,
+            0.335882
+          ]
+        },
+        {
+          "round": 3,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769333,
+          "global_consistency": 0.637212,
+          "attacker_agreement": 0.651491,
+          "attacker_weight": 0.336241,
+          "weights": [
+            0.328078,
+            0.335682,
+            0.336241
+          ]
+        },
+        {
+          "round": 4,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769067,
+          "global_consistency": 0.624731,
+          "attacker_agreement": 0.645657,
+          "attacker_weight": 0.337627,
+          "weights": [
+            0.328289,
+            0.334084,
+            0.337627
+          ]
+        },
+        {
+          "round": 5,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769067,
+          "global_consistency": 0.624731,
+          "attacker_agreement": 0.645657,
+          "attacker_weight": 0.337627,
+          "weights": [
+            0.328289,
+            0.334084,
+            0.337627
+          ]
+        },
+        {
+          "round": 6,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769067,
+          "global_consistency": 0.624617,
+          "attacker_agreement": 0.645487,
+          "attacker_weight": 0.337615,
+          "weights": [
+            0.328286,
+            0.334098,
+            0.337615
+          ]
+        },
+        {
+          "round": 7,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769067,
+          "global_consistency": 0.624731,
+          "attacker_agreement": 0.645657,
+          "attacker_weight": 0.337627,
+          "weights": [
+            0.328289,
+            0.334084,
+            0.337627
+          ]
+        },
+        {
+          "round": 8,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769067,
+          "global_consistency": 0.624641,
+          "attacker_agreement": 0.645523,
+          "attacker_weight": 0.337618,
+          "weights": [
+            0.328302,
+            0.334081,
+            0.337618
+          ]
+        },
+        {
+          "round": 9,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769067,
+          "global_consistency": 0.624731,
+          "attacker_agreement": 0.645657,
+          "attacker_weight": 0.337627,
+          "weights": [
+            0.328289,
+            0.334084,
+            0.337627
+          ]
+        },
+        {
+          "round": 10,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769067,
+          "global_consistency": 0.624731,
+          "attacker_agreement": 0.645657,
+          "attacker_weight": 0.337627,
+          "weights": [
+            0.328289,
+            0.334084,
+            0.337627
+          ]
+        }
+      ]
+    },
+    "label_flip": {
+      "fedavg": [
+        {
+          "round": 1,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769156,
+          "global_consistency": 0.208429,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 2,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768267,
+          "global_consistency": 0.206665,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 3,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768533,
+          "global_consistency": 0.20536,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 4,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768178,
+          "global_consistency": 0.190875,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 5,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768267,
+          "global_consistency": 0.19967,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 6,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768267,
+          "global_consistency": 0.19485,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 7,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768444,
+          "global_consistency": 0.195975,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 8,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768622,
+          "global_consistency": 0.198948,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 9,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768178,
+          "global_consistency": 0.196674,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 10,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768267,
+          "global_consistency": 0.200469,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        }
+      ],
+      "ours": [
+        {
+          "round": 1,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769156,
+          "global_consistency": 0.208429,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.27584,
+          "weights": [
+            0.36208,
+            0.36208,
+            0.27584
+          ]
+        },
+        {
+          "round": 2,
+          "gain": 1.0,
+          "pooled_accuracy": 0.767911,
+          "global_consistency": 0.203324,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.277011,
+          "weights": [
+            0.361495,
+            0.361495,
+            0.277011
+          ]
+        },
+        {
+          "round": 3,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768444,
+          "global_consistency": 0.200804,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.277592,
+          "weights": [
+            0.361204,
+            0.361204,
+            0.277592
+          ]
+        },
+        {
+          "round": 4,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768,
+          "global_consistency": 0.204706,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.276693,
+          "weights": [
+            0.361654,
+            0.361654,
+            0.276693
+          ]
+        },
+        {
+          "round": 5,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768267,
+          "global_consistency": 0.196618,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.278563,
+          "weights": [
+            0.360719,
+            0.360719,
+            0.278563
+          ]
+        },
+        {
+          "round": 6,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768089,
+          "global_consistency": 0.201277,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.277482,
+          "weights": [
+            0.361259,
+            0.361259,
+            0.277482
+          ]
+        },
+        {
+          "round": 7,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768622,
+          "global_consistency": 0.19895,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.278021,
+          "weights": [
+            0.36099,
+            0.36099,
+            0.278021
+          ]
+        },
+        {
+          "round": 8,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768178,
+          "global_consistency": 0.196674,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.27855,
+          "weights": [
+            0.360725,
+            0.360725,
+            0.27855
+          ]
+        },
+        {
+          "round": 9,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768267,
+          "global_consistency": 0.200468,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.277669,
+          "weights": [
+            0.361165,
+            0.361165,
+            0.277669
+          ]
+        },
+        {
+          "round": 10,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768089,
+          "global_consistency": 0.203697,
+          "attacker_agreement": 0.0,
+          "attacker_weight": 0.276925,
+          "weights": [
+            0.361538,
+            0.361538,
+            0.276925
+          ]
+        }
+      ]
+    },
+    "weight_poison": {
+      "fedavg": [
+        {
+          "round": 1,
+          "gain": 0.0,
+          "pooled_accuracy": 0.770133,
+          "global_consistency": 0.652686,
+          "attacker_agreement": 0.666386,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 2,
+          "gain": 0.0,
+          "pooled_accuracy": 0.7696,
+          "global_consistency": 0.634219,
+          "attacker_agreement": 0.650949,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 3,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769244,
+          "global_consistency": 0.623794,
+          "attacker_agreement": 0.643221,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 4,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769689,
+          "global_consistency": 0.633335,
+          "attacker_agreement": 0.650981,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 5,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769156,
+          "global_consistency": 0.626102,
+          "attacker_agreement": 0.648309,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 6,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769511,
+          "global_consistency": 0.630532,
+          "attacker_agreement": 0.648334,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 7,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769867,
+          "global_consistency": 0.620885,
+          "attacker_agreement": 0.637744,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 8,
+          "gain": 0.0,
+          "pooled_accuracy": 0.768533,
+          "global_consistency": 0.638678,
+          "attacker_agreement": 0.65408,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 9,
+          "gain": 0.0,
+          "pooled_accuracy": 0.769511,
+          "global_consistency": 0.629596,
+          "attacker_agreement": 0.647899,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        },
+        {
+          "round": 10,
+          "gain": 0.0,
+          "pooled_accuracy": 0.7688,
+          "global_consistency": 0.624032,
+          "attacker_agreement": 0.644352,
+          "attacker_weight": 0.333333,
+          "weights": [
+            0.333333,
+            0.333333,
+            0.333333
+          ]
+        }
+      ],
+      "ours": [
+        {
+          "round": 1,
+          "gain": 1.0,
+          "pooled_accuracy": 0.770133,
+          "global_consistency": 0.652686,
+          "attacker_agreement": 0.666386,
+          "attacker_weight": 0.336097,
+          "weights": [
+            0.330488,
+            0.333415,
+            0.336097
+          ]
+        },
+        {
+          "round": 2,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769156,
+          "global_consistency": 0.626427,
+          "attacker_agreement": 0.648898,
+          "attacker_weight": 0.337939,
+          "weights": [
+            0.328032,
+            0.334029,
+            0.337939
+          ]
+        },
+        {
+          "round": 3,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769156,
+          "global_consistency": 0.626564,
+          "attacker_agreement": 0.649005,
+          "attacker_weight": 0.337932,
+          "weights": [
+            0.328046,
+            0.334022,
+            0.337932
+          ]
+        },
+        {
+          "round": 4,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769689,
+          "global_consistency": 0.63127,
+          "attacker_agreement": 0.652561,
+          "attacker_weight": 0.337684,
+          "weights": [
+            0.327036,
+            0.33528,
+            0.337684
+          ]
+        },
+        {
+          "round": 5,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769689,
+          "global_consistency": 0.62939,
+          "attacker_agreement": 0.650514,
+          "attacker_weight": 0.337655,
+          "weights": [
+            0.327437,
+            0.334908,
+            0.337655
+          ]
+        },
+        {
+          "round": 6,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769333,
+          "global_consistency": 0.624275,
+          "attacker_agreement": 0.640477,
+          "attacker_weight": 0.336658,
+          "weights": [
+            0.328211,
+            0.335131,
+            0.336658
+          ]
+        },
+        {
+          "round": 7,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769867,
+          "global_consistency": 0.638027,
+          "attacker_agreement": 0.653322,
+          "attacker_weight": 0.336446,
+          "weights": [
+            0.327906,
+            0.335648,
+            0.336446
+          ]
+        },
+        {
+          "round": 8,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769333,
+          "global_consistency": 0.627682,
+          "attacker_agreement": 0.646048,
+          "attacker_weight": 0.337094,
+          "weights": [
+            0.328735,
+            0.33417,
+            0.337094
+          ]
+        },
+        {
+          "round": 9,
+          "gain": 1.0,
+          "pooled_accuracy": 0.769511,
+          "global_consistency": 0.619614,
+          "attacker_agreement": 0.637114,
+          "attacker_weight": 0.336935,
+          "weights": [
+            0.328127,
+            0.334938,
+            0.336935
+          ]
+        },
+        {
+          "round": 10,
+          "gain": 1.0,
+          "pooled_accuracy": 0.768711,
+          "global_consistency": 0.638825,
+          "attacker_agreement": 0.659048,
+          "attacker_weight": 0.337447,
+          "weights": [
+            0.327734,
+            0.33482,
+            0.337447
+          ]
+        }
+      ]
+    }
+  },
+  "rounds": 10,
   "flip_frac": 1.0,
   "poison_scale": 2.0,
+  "max_train": 15000,
+  "n_estimators": 50,
+  "attack": "none",
   "variants": {
     "fedavg": [
       {
         "round": 1,
         "gain": 0.0,
-        "pooled_accuracy": 0.769156,
-        "global_consistency": 0.208429,
-        "attacker_agreement": 0.0,
+        "pooled_accuracy": 0.770133,
+        "global_consistency": 0.652686,
+        "attacker_agreement": 0.666386,
         "attacker_weight": 0.333333,
         "weights": [
           0.333333,
@@ -21,9 +823,9 @@
       {
         "round": 2,
         "gain": 0.0,
-        "pooled_accuracy": 0.768267,
-        "global_consistency": 0.206665,
-        "attacker_agreement": 0.0,
+        "pooled_accuracy": 0.768889,
+        "global_consistency": 0.636694,
+        "attacker_agreement": 0.653075,
         "attacker_weight": 0.333333,
         "weights": [
           0.333333,
@@ -34,9 +836,9 @@
       {
         "round": 3,
         "gain": 0.0,
-        "pooled_accuracy": 0.768533,
-        "global_consistency": 0.20536,
-        "attacker_agreement": 0.0,
+        "pooled_accuracy": 0.769333,
+        "global_consistency": 0.627689,
+        "attacker_agreement": 0.646054,
         "attacker_weight": 0.333333,
         "weights": [
           0.333333,
@@ -47,9 +849,9 @@
       {
         "round": 4,
         "gain": 0.0,
-        "pooled_accuracy": 0.768178,
-        "global_consistency": 0.190875,
-        "attacker_agreement": 0.0,
+        "pooled_accuracy": 0.769333,
+        "global_consistency": 0.627687,
+        "attacker_agreement": 0.646052,
         "attacker_weight": 0.333333,
         "weights": [
           0.333333,
@@ -60,9 +862,74 @@
       {
         "round": 5,
         "gain": 0.0,
-        "pooled_accuracy": 0.768267,
-        "global_consistency": 0.19967,
-        "attacker_agreement": 0.0,
+        "pooled_accuracy": 0.769333,
+        "global_consistency": 0.627614,
+        "attacker_agreement": 0.645943,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ]
+      },
+      {
+        "round": 6,
+        "gain": 0.0,
+        "pooled_accuracy": 0.769333,
+        "global_consistency": 0.627614,
+        "attacker_agreement": 0.645943,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ]
+      },
+      {
+        "round": 7,
+        "gain": 0.0,
+        "pooled_accuracy": 0.769333,
+        "global_consistency": 0.627686,
+        "attacker_agreement": 0.646052,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ]
+      },
+      {
+        "round": 8,
+        "gain": 0.0,
+        "pooled_accuracy": 0.769333,
+        "global_consistency": 0.627614,
+        "attacker_agreement": 0.645943,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ]
+      },
+      {
+        "round": 9,
+        "gain": 0.0,
+        "pooled_accuracy": 0.769333,
+        "global_consistency": 0.627614,
+        "attacker_agreement": 0.645943,
+        "attacker_weight": 0.333333,
+        "weights": [
+          0.333333,
+          0.333333,
+          0.333333
+        ]
+      },
+      {
+        "round": 10,
+        "gain": 0.0,
+        "pooled_accuracy": 0.769333,
+        "global_consistency": 0.627614,
+        "attacker_agreement": 0.645943,
         "attacker_weight": 0.333333,
         "weights": [
           0.333333,
@@ -75,66 +942,131 @@
       {
         "round": 1,
         "gain": 1.0,
-        "pooled_accuracy": 0.769156,
-        "global_consistency": 0.208429,
-        "attacker_agreement": 0.0,
-        "attacker_weight": 0.27584,
+        "pooled_accuracy": 0.770133,
+        "global_consistency": 0.652686,
+        "attacker_agreement": 0.666386,
+        "attacker_weight": 0.336097,
         "weights": [
-          0.36208,
-          0.36208,
-          0.27584
+          0.330488,
+          0.333415,
+          0.336097
         ]
       },
       {
         "round": 2,
         "gain": 1.0,
-        "pooled_accuracy": 0.767911,
-        "global_consistency": 0.203324,
-        "attacker_agreement": 0.0,
-        "attacker_weight": 0.277011,
+        "pooled_accuracy": 0.769067,
+        "global_consistency": 0.638846,
+        "attacker_agreement": 0.651375,
+        "attacker_weight": 0.335882,
         "weights": [
-          0.361495,
-          0.361495,
-          0.277011
+          0.328024,
+          0.336094,
+          0.335882
         ]
       },
       {
         "round": 3,
         "gain": 1.0,
-        "pooled_accuracy": 0.768444,
-        "global_consistency": 0.200804,
-        "attacker_agreement": 0.0,
-        "attacker_weight": 0.277592,
+        "pooled_accuracy": 0.769333,
+        "global_consistency": 0.637212,
+        "attacker_agreement": 0.651491,
+        "attacker_weight": 0.336241,
         "weights": [
-          0.361204,
-          0.361204,
-          0.277592
+          0.328078,
+          0.335682,
+          0.336241
         ]
       },
       {
         "round": 4,
         "gain": 1.0,
-        "pooled_accuracy": 0.768,
-        "global_consistency": 0.204706,
-        "attacker_agreement": 0.0,
-        "attacker_weight": 0.276693,
+        "pooled_accuracy": 0.769067,
+        "global_consistency": 0.624731,
+        "attacker_agreement": 0.645657,
+        "attacker_weight": 0.337627,
         "weights": [
-          0.361654,
-          0.361654,
-          0.276693
+          0.328289,
+          0.334084,
+          0.337627
         ]
       },
       {
         "round": 5,
         "gain": 1.0,
-        "pooled_accuracy": 0.768267,
-        "global_consistency": 0.196618,
-        "attacker_agreement": 0.0,
-        "attacker_weight": 0.278563,
+        "pooled_accuracy": 0.769067,
+        "global_consistency": 0.624731,
+        "attacker_agreement": 0.645657,
+        "attacker_weight": 0.337627,
         "weights": [
-          0.360719,
-          0.360719,
-          0.278563
+          0.328289,
+          0.334084,
+          0.337627
+        ]
+      },
+      {
+        "round": 6,
+        "gain": 1.0,
+        "pooled_accuracy": 0.769067,
+        "global_consistency": 0.624617,
+        "attacker_agreement": 0.645487,
+        "attacker_weight": 0.337615,
+        "weights": [
+          0.328286,
+          0.334098,
+          0.337615
+        ]
+      },
+      {
+        "round": 7,
+        "gain": 1.0,
+        "pooled_accuracy": 0.769067,
+        "global_consistency": 0.624731,
+        "attacker_agreement": 0.645657,
+        "attacker_weight": 0.337627,
+        "weights": [
+          0.328289,
+          0.334084,
+          0.337627
+        ]
+      },
+      {
+        "round": 8,
+        "gain": 1.0,
+        "pooled_accuracy": 0.769067,
+        "global_consistency": 0.624641,
+        "attacker_agreement": 0.645523,
+        "attacker_weight": 0.337618,
+        "weights": [
+          0.328302,
+          0.334081,
+          0.337618
+        ]
+      },
+      {
+        "round": 9,
+        "gain": 1.0,
+        "pooled_accuracy": 0.769067,
+        "global_consistency": 0.624731,
+        "attacker_agreement": 0.645657,
+        "attacker_weight": 0.337627,
+        "weights": [
+          0.328289,
+          0.334084,
+          0.337627
+        ]
+      },
+      {
+        "round": 10,
+        "gain": 1.0,
+        "pooled_accuracy": 0.769067,
+        "global_consistency": 0.624731,
+        "attacker_agreement": 0.645657,
+        "attacker_weight": 0.337627,
+        "weights": [
+          0.328289,
+          0.334084,
+          0.337627
         ]
       }
     ]

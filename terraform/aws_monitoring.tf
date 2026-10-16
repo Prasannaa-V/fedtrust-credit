@@ -96,11 +96,12 @@ resource "aws_cloudwatch_dashboard" "fedtrust_dashboard" {
         width  = 12
         height = 6
         properties = {
-          title   = "RoundLatencySeconds"
-          metrics = [["FedTrustCredit/FL", "RoundLatencySeconds"]]
+          title   = "API Latency Histogram (APILatencySeconds p95)"
+          metrics = [["FedTrustCredit/FL", "APILatencySeconds"]]
           period  = 300
-          stat    = "Average"
+          stat    = "p95"
           region  = var.aws_region
+          view    = "bar"
         }
       },
       {

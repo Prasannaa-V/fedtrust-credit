@@ -113,6 +113,22 @@
 **Decision**: `terraform/aws_monitoring.tf` gains `aws_cloudwatch_dashboard.fedtrust_dashboard` (DefaultProbability, ConsistencyScore, latency, alarm panel); `src/deploy_cloudwatch_dashboard.py` mirrors layout via `put_dashboard` with `--dry-run` for CI.
 **Reason**: Visual proof required by midterm §9.1; Terraform is source of truth, script enables refresh without `terraform apply`.
 
+### D-026: DP Sensitivity Reporting + Per-Release Scope (9.2 completion)
+**Decision**: `FederatedClient.fit()` reports `update_l2_norm` every round (L2 of local-probs − received global signal) plus `dp_pre_noise_norm`/`dp_sigma`/`dp_noise_l2_norm` when DP is on; `run_differential_privacy.py` aggregates per-round mean/max into `results/dp/dp_sweep.json` and adds a sensitivity inset to the tradeoff plot. Documented scope: per-message `(ε,δ)`-DP only, no cross-round composition accountant.
+**Reason**: Satisfies the explicit "measure and report gradient sensitivity" requirement with executed numbers; honest scope prevents overstating the guarantee for compliance claims.
+
+### D-027: Byzantine Clean Baseline + Post-Training Poison Blindness (9.3 completion)
+**Decision**: `byzantine_attack.py` gains `--attacks none,label_flip,weight_poison` (clean FedAvg baseline under identical subsample/rounds) and `byzantine_clean_vs_attacked.png`. Finding: label-flip diverges SHAP (a₃ 0.646→0.0) and is down-weighted (w₃ 0.333→0.277) with FedAvg degrading −0.0010 vs clean; post-training weight-poison leaves SHAP/accuracy untouched, so consistency scoring is blind to it.
+**Reason**: The clean baseline is what makes the "FedAvg degrades, ours holds" comparison meaningful; the negative weight-poison result is reported rather than hidden.
+
+### D-028: German Exact-Category Partition + Fairness Caveat (9.4 completion)
+**Decision**: Replaced overlapping regex bins (which degenerated to fallback thirds) with disjoint exact-match categories: `existing paid` / `critical/other existing` / `delayed+all paid+no credits` (530/293/177, defaults 31.9%/17.1%/45.8%); 20 rounds with per-round test-accuracy history and per-institution fairness spreads in `german_results.json`.
+**Reason**: Overlapping masks leaked rows across silos; exact bins give a genuinely non-IID, reproducible split. Fairness spreads are identical across variants because the proxy eval trains final per-client models locally — documented in the report instead of presented as a variant effect.
+
+### D-029: API Latency Telemetry + Histogram Widget + Local Snapshot (9.1 completion)
+**Decision**: `AWSCloudManager.log_latency_to_cloudwatch()` emits `APILatencySeconds` (Seconds unit, Endpoint dimension) from timed `predict-risk`/`simulate-round` handlers; dashboard latency widget switched to p95 bar (histogram) view in both Terraform and the deploy script; `src/monitoring_snapshot.py` renders a 4-panel local-verification figure from executed data (`results/monitoring/api_latency.json`).
+**Reason**: Latency was previously declared but never emitted — an unlogged metric widget is dashboard theater. Live AWS screenshot still requires credentials absent from this environment (verified: no boto3/Terraform/AWS CLI/creds); the snapshot is explicitly labeled local, not an AWS console capture.
+
 
 
 

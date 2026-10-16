@@ -135,6 +135,36 @@ def run_variant(clients, sizes, num_rounds, gain, attack, poison_scale):
     return records
 
 
+def save_clean_comparison(attacks, out_path):
+    """Clean FedAvg baseline vs attacked FedAvg vs attacked Ours accuracy."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(9, 4.5))
+    clean = attacks["none"]["fedavg"]
+    ax.plot([r["round"] for r in clean],
+            [r["pooled_accuracy"] for r in clean],
+            marker="o", label="FedAvg clean (no attack)")
+    for attack in [a for a in attacks if a != "none"]:
+        fa = attacks[attack]["fedavg"]
+        ou = attacks[attack]["ours"]
+        ax.plot([r["round"] for r in fa],
+                [r["pooled_accuracy"] for r in fa],
+                marker="x", label=f"FedAvg under {attack}")
+        ax.plot([r["round"] for r in ou],
+                [r["pooled_accuracy"] for r in ou],
+                marker="s", label=f"Ours under {attack}")
+    ax.set_xlabel("Federated round")
+    ax.set_ylabel("Pooled accuracy")
+    ax.set_title("Clean baseline vs Byzantine attacks (Bank 3 malicious)")
+    ax.legend(fontsize=8)
+    ax.grid(alpha=0.3)
+    fig.tight_layout()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path, dpi=150)
+    print(f"[byzantine] plot saved -> {out_path}")
+
+
 def save_plot(fedavg_recs, ours_recs, attack, out_path):
     import matplotlib
     matplotlib.use("Agg")
@@ -167,8 +197,11 @@ def save_plot(fedavg_recs, ours_recs, attack, out_path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--attack", choices=["label_flip", "weight_poison"],
+    ap.add_argument("--attack", choices=["label_flip", "weight_poison", "none"],
                     default="label_flip")
+    ap.add_argument("--attacks", type=str, default=None,
+                    help="Comma-separated attacks to run (overrides --attack), "
+                         "e.g. 'none,label_flip,weight_poison'")
     ap.add_argument("--rounds", type=int, default=10)
     ap.add_argument("--flip-frac", type=float, default=1.0)
     ap.add_argument("--poison-scale", type=float, default=2.0)
@@ -186,25 +219,36 @@ def main():
     print(f"[byzantine] shared features: {len(shared)}")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    summary = {"attack": args.attack, "rounds": args.rounds,
+    attacks = [a.strip() for a in args.attacks.split(",")] if args.attacks \
+        else [args.attack]
+    summary = {"attacks": {}, "rounds": args.rounds,
                "flip_frac": args.flip_frac, "poison_scale": args.poison_scale,
-               "variants": {}}
+               "max_train": args.max_train, "n_estimators": args.n_estimators}
 
-    for gain, name in [(0.0, "fedavg"), (args.gain, "ours")]:
-        clients, sizes = build_poisoned_clients(
-            parts, shared, attack=args.attack,
-            flip_frac=args.flip_frac, poison_scale=args.poison_scale,
-            max_train=args.max_train, n_estimators=args.n_estimators)
-        print(f"\n=== variant={name} gain={gain} attack={args.attack} ===")
-        recs = run_variant(clients, sizes, args.rounds, gain,
-                           args.attack, args.poison_scale)
-        summary["variants"][name] = recs
+    for attack in attacks:
+        summary["attacks"][attack] = {}
+        for gain, name in [(0.0, "fedavg"), (args.gain, "ours")]:
+            clients, sizes = build_poisoned_clients(
+                parts, shared, attack=attack,
+                flip_frac=args.flip_frac, poison_scale=args.poison_scale,
+                max_train=args.max_train, n_estimators=args.n_estimators)
+            print(f"\n=== attack={attack} variant={name} gain={gain} ===")
+            recs = run_variant(clients, sizes, args.rounds, gain,
+                               attack, args.poison_scale)
+            summary["attacks"][attack][name] = recs
+    # backward-compatible top-level view for the primary attack
+    primary = attacks[0]
+    summary.update({"attack": primary,
+                    "variants": summary["attacks"][primary]})
 
     with open(OUT_DIR / "attack_results.json", "w") as f:
         json.dump(summary, f, indent=2)
     print(f"[byzantine] results -> {OUT_DIR / 'attack_results.json'}")
     save_plot(summary["variants"]["fedavg"], summary["variants"]["ours"],
-              args.attack, PLOTS_DIR / "byzantine_robustness.png")
+              primary, PLOTS_DIR / "byzantine_robustness.png")
+    if "none" in summary["attacks"]:
+        save_clean_comparison(summary["attacks"],
+                              PLOTS_DIR / "byzantine_clean_vs_attacked.png")
 
 
 if __name__ == "__main__":
