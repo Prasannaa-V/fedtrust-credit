@@ -78,4 +78,30 @@ Local verification (executed): `src/monitoring_snapshot.py` → `results/plots/c
 `src/static/index.html` simulator now has Byzantine `attackSelect` + DP `dpEpsilonSlider`; `src/static/app.js:runSimulation()` forwards `attack_mode`/`dp_epsilon` to `POST /api/federated/simulate-round` (backward-compatible defaults).
 
 ## 8. Decisions & Repro
-See `docs/DECISIONS.md` D-001→D-025, `docs/PROGRESS.md`, `pytest.ini`. Tests: `13 + 4` new (`tests/test_robustness_privacy.py`).
+See `docs/DECISIONS.md` D-001→D-029, `docs/PROGRESS.md`, `pytest.ini`. Tests: 25/25 pass (13 original + 12 `tests/test_robustness_privacy.py`).
+
+## Appendix B. Corrections to Review 2
+
+Review 2 was written at 75% completion. The statements below were found inaccurate, or need qualification, when every claim was checked against the code and result files.
+
+| Review 2 statement | Status in this report |
+|---|---|
+| Consistency is a Spearman rank correlation of TreeSHAP vectors | Cosine similarity of mean-absolute SHAP vectors, in code and in all results (D-020) |
+| Banks partitioned by grade: A–B (~8% default), C–D (~17%), E–G (~32%) | Executed partition: grade A/B (10.64%), 16 East-Coast states (28.72%), issue dates 2016-12 to 2018-12 (29.07%); banks 2 and 3 hold grades C–G |
+| Dataset: 26 engineered features | Not reproduced. The shared one-hot feature space is 129 columns in R1 and 84 in R2 |
+| SHAP vectors cost 1,548 B per round per client | 1,548 B per round in total, 516 B per client |
+| Only model weights are shared with the aggregator | Each client sends per-row training probabilities and its SHAP vector; the server uses only the probability mean (D-011) |
+| Ours outperforms FedAvg on accuracy (+0.06%) and AUC (+0.002) | The final-round deltas are real (+0.0007, +0.0020) but within noise; the mean paired accuracy difference over 20 rounds is −0.00012 |
+| Fairer outcomes for minority-population clients | Accuracy spread −0.17 pp, F1 spread +0.95 pp wider; not distinguishable from noise |
+| Bank clients train inside their own VPCs and exchange updates over the network | Training is simulated in one process; the cloud hosts serving, storage and telemetry |
+| SNS alert email shows a default probability of 3916.0% | Double ×100 scaling; code now passes the percentage unscaled, fresh capture pending |
+
+> Verification notes (checked 2026-10-16 against `results/partition_stats.json`,
+> `results/fedavg_baseline/round_*.json`, `results/consistency_aware/round_*.json`,
+> `src/local_training.py`, `src/aws_integrations.py`): partition rates
+> 10.64/28.72/29.07 and grades C–G in banks 2–3 confirmed; mean paired
+> accuracy difference −0.000122 confirmed; SHAP payload 1,548 B total confirmed;
+> SNS message now formats the percentage unscaled. "R1/R2" above denote the
+> pre-retune (84-feature, D-017) vs post-Session-9-retune (129-feature, D-021)
+> executed runs; `models/model_metadata.json` for the serving path lists 131
+> shared columns (2-column snapshot difference, logged here rather than hidden).
