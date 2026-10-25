@@ -75,7 +75,7 @@
       </div>
       <div class="hero-chip">
         <span class="chip-label">Cloud Providers</span>
-        <span class="chip-val">AWS + Azure (Multi-Cloud)</span>
+        <span class="chip-val">AWS EC2 (Multi-VPC)</span>
       </div>
     </section>
 
@@ -486,7 +486,7 @@
     <main class="tab-content" id="tab-cloud">
       <div class="section-title">
         <h2>Multi-Cloud Infrastructure — Live Status</h2>
-        <p>Real-time connectivity status for all integrated AWS cloud services and the Azure Bank 3 node. Metrics are pulled live from the running EC2 instance.</p>
+        <p>Real-time connectivity status for all integrated AWS cloud services. All three bank nodes are containerised on AWS EC2 <code>us-east-1</code> with isolated Docker bridge networks replicating the VPC boundary design. Metrics are pulled live from the running EC2 instance.</p>
       </div>
 
       <!-- Cloud provider summary cards -->
@@ -510,24 +510,24 @@
           </div>
         </div>
 
-        <div class="glass-card cloud-provider-card azure-card">
+        <div class="glass-card cloud-provider-card" id="awsBank3Card">
           <div class="provider-header">
-            <div class="provider-logo azure-logo">
+            <div class="provider-logo aws-logo">
               <svg viewBox="0 0 80 48" width="52" height="32" fill="none">
-                <text x="0" y="36" font-family="Arial Black, sans-serif" font-size="22" font-weight="900" fill="#0078D4">Azure</text>
+                <text x="0" y="36" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#FF9900">AWS</text>
               </svg>
             </div>
             <div class="provider-status-dot online"></div>
           </div>
           <div class="provider-info">
-            <h3>Microsoft Azure</h3>
-            <p>Region: <strong>East US</strong></p>
-            <p>Role: Bank 3 — Subprime Client Node</p>
+            <h3>Bank 3 — AWS VPC 3</h3>
+            <p>Region: <strong>us-east-1</strong></p>
+            <p>Role: Subprime Client Node (Grades E–G)</p>
           </div>
           <div class="provider-services">
             <div class="service-row service-ok">
               <span class="svc-dot ok"></span>
-              <span class="svc-name">Azure VM (Standard B1s)</span>
+              <span class="svc-name">Docker Container (vpc-bank-3)</span>
               <span class="svc-status-label">Running</span>
             </div>
             <div class="service-row service-ok">
@@ -537,7 +537,7 @@
             </div>
             <div class="service-row service-ok">
               <span class="svc-dot ok"></span>
-              <span class="svc-name">Cross-Cloud gRPC Channel</span>
+              <span class="svc-name">Isolated Bridge Network</span>
               <span class="svc-status-label">Active</span>
             </div>
           </div>
@@ -563,7 +563,7 @@
           <div class="arch-node bank-node">
             <div class="arch-icon">🏦</div>
             <div class="arch-label">Bank 3</div>
-            <div class="arch-sub">Azure VM · Subprime</div>
+            <div class="arch-sub">AWS EC2 · Subprime</div>
           </div>
         </div>
         <div class="arch-flow" style="margin-top: 1rem;">

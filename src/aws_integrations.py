@@ -67,8 +67,8 @@ class AWSCloudManager:
             "services": {
                 "ec2": {
                     "status": "active",
-                    "role": "Central Aggregator & Web Server",
-                    "description": "Docker containerized compute instance",
+                    "role": "Central Aggregator + All 3 Bank Nodes (vpc-bank-1/2/3)",
+                    "description": "Docker containerised — all banks on AWS EC2 us-east-1",
                 },
                 "s3": {
                     "status": "configured" if self.s3_bucket else "ready_to_connect",

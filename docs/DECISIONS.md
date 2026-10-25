@@ -132,3 +132,7 @@
 
 
 
+
+### D-030: Bank 3 Migrated from Azure VM to AWS EC2 VPC 3 (2026-10-25)
+**Decision**: Azure free tier expired. Bank 3 (Subprime, Grades E–G) is now fully containerised on the same AWS EC2 instance as Banks 1 & 2, isolated via a dedicated Docker bridge network `vpc-bank-3`. The `docker-compose.yml` network was renamed from `vnet-bank-3` to `vpc-bank-3`; the Cloud Status tab, architecture diagram, and header chip in `index.html` were updated to reflect AWS-only deployment. The `aws_integrations.py` `get_cloud_status()` EC2 role description was updated. The Terraform `azure_compute.tf` and `azure_storage.tf` files are retained for documentation of the original multi-cloud design intent.
+**Reason**: Infrastructure practicality — Azure free tier exhausted. The VPC isolation model (3 isolated Docker bridge networks on a single EC2 host) correctly simulates the original multi-cloud boundary design at zero extra cost.

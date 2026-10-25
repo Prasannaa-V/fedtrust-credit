@@ -1,24 +1,27 @@
 # ==============================================================================
 # FedTrust-Credit — Multi-Node Cloud Simulation via Docker Compose
 # Course: CLOUD COMPUTING – BITE412L
-# Replicates the isolated multi-VPC / multi-cloud architecture from Section 3.5:
+# Replicates the isolated multi-VPC architecture from Section 3.5:
 #   - Aggregator Service: Central Server + FastAPI Interactive Web UI
 #   - Bank Client 1: Isolated VPC 1 (Low-Risk / Grades A-B)
 #   - Bank Client 2: Isolated VPC 2 (Mid-Risk / Grades C-D)
-#   - Bank Client 3: Isolated Azure VNet (Subprime / Grades E-G)
+#   - Bank Client 3: Isolated VPC 3 (Subprime / Grades E-G) — AWS EC2
 # ==============================================================================
+# Note: Originally Bank 3 was deployed on Azure VM (East US). All three banks
+# are now fully simulated on AWS EC2 us-east-1 using isolated Docker networks
+# that replicate the VPC isolation boundaries of the original multi-cloud design.
 
 version: "3.8"
 
 networks:
-  # Isolated virtual networks replicating AWS VPCs and Azure VNet
+  # Isolated Docker bridge networks replicating 3 AWS VPCs
   aggregator-net:
     driver: bridge
   vpc-bank-1:
     driver: bridge
   vpc-bank-2:
     driver: bridge
-  vnet-bank-3:
+  vpc-bank-3:
     driver: bridge
 
 services:
@@ -41,7 +44,7 @@ services:
       - aggregator-net
       - vpc-bank-1
       - vpc-bank-2
-      - vnet-bank-3
+      - vpc-bank-3
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 15s
@@ -82,7 +85,7 @@ services:
       - AGGREGATOR_HOST=aggregator
       - AGGREGATOR_PORT=8080
 
-  # ── Bank Client 3 (Azure VM VNet 3) ─────────────────────────────────────────
+  # ── Bank Client 3 (AWS EC2 VPC 3) ─────────────────────────────────────────
   bank-client-3:
     build:
       context: .
@@ -91,9 +94,9 @@ services:
     depends_on:
       aggregator:
         condition: service_healthy
-    command: ["python", "-c", "print('Bank Client 3 [Azure VNet] container initialized and connected.')"]
+    command: ["python", "-c", "print('Bank Client 3 [AWS VPC 3] container initialized and connected.')"]
     networks:
-      - vnet-bank-3
+      - vpc-bank-3
     environment:
       - CLIENT_ID=client_3
       - AGGREGATOR_HOST=aggregator

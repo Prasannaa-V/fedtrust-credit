@@ -91,8 +91,8 @@ fedtrust-credit/
 ## 4. Live Multi-Cloud Infrastructure
 
 The system is deployed across a live hybrid-cloud topology:
-1. **AWS EC2** (`us-east-1`): Hosts the Central Aggregator container and simulated Bank 1 & 2 containers on port 8000.
-2. **Azure Linux VM** (`East US`): Hosts simulated Bank 3 (Subprime portfolio) in an isolated Azure VNet.
+1. **AWS EC2** (`us-east-1`): Hosts the Central Aggregator container and all 3 Bank containers (vpc-bank-1, vpc-bank-2, vpc-bank-3) on port 8000.
+   > **Note (D-030)**: Bank 3 was originally on Azure VM (East US). Azure free tier expired 2026-10-25 — all banks are now on AWS EC2 with isolated Docker bridge networks replicating the original VPC boundaries.
 3. **AWS S3** (`fedtrust-models`): Cloud model registry where trained LightGBM models are uploaded and fetched.
 4. **Amazon CloudWatch**: Receives real-time `DefaultProbability` telemetry under namespace `FedTrustCredit/FL`.
 5. **Amazon SNS** (`fedtrust-risk-alerts`): Automatically dispatches high-risk borrower email alerts when `default_probability_pct >= 35.0%`.
@@ -182,7 +182,7 @@ Run pytest from the repository root (configured via `pytest.ini`):
 Open `http://localhost:8000` for the Web Dashboard, or `http://localhost:8000/docs` for the interactive Swagger API documentation.
 
 ### 4. Deploying Updates to Cloud Instances
-* **AWS EC2 Aggregator** (`13.218.90.189`):
+* **AWS EC2** (`13.218.90.189`):
   ```bash
   ssh ubuntu@13.218.90.189
   cd ~/fedtrust-credit && git pull
@@ -190,13 +190,7 @@ Open `http://localhost:8000` for the Web Dashboard, or `http://localhost:8000/do
   sudo docker cp src/static/ fedtrust-dashboard:/app/src/
   sudo docker restart fedtrust-dashboard
   ```
-* **Azure VM Bank 3** (`4.247.30.164`):
-  ```bash
-  ssh azureuser@4.247.30.164
-  cd ~/fedtrust-credit && git pull
-  sudo docker cp src/service.py fedtrust-azure-dashboard:/app/src/service.py
-  sudo docker restart fedtrust-azure-dashboard
-  ```
+  All 3 bank containers (`fedtrust-bank-client-1`, `fedtrust-bank-client-2`, `fedtrust-bank-client-3`) are on this same instance.
 
 ---
 
