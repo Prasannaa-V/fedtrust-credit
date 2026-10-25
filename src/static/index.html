@@ -55,7 +55,6 @@
       <div class="status-indicator">
         <span class="pulse-dot"></span>
         <span class="status-text">Service Active</span>
-        <button type="button" class="btn-viva-quick" id="btnOpenVivaModal" title="Open 10-Minute Viva Defense Cheat Sheet">📋 Viva Guide</button>
         <a href="/docs" target="_blank" class="api-link" title="Open Swagger API documentation">API Docs</a>
       </div>
     </header>
@@ -647,61 +646,6 @@
         <p class="credits">Prashaanth Raj J M (23BIT0173) &bull; Prasannaa V (23BIT0041) &bull; Haswanth K (23BIT0359) &bull; Guided by Dr. Siva Rama Krishnan S</p>
       </div>
     </footer>
-  </div>
-
-  <!-- Viva Defense Reference Modal -->
-  <div class="modal-backdrop" id="vivaModal" style="display: none;">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <h3>🎓 FedTrust-Credit — Viva Defense Quick Reference</h3>
-          <span class="modal-subtitle">Course: Cloud Computing (BITE412L) &bull; Guide: Dr. Siva Rama Krishnan S</span>
-        </div>
-        <button type="button" class="modal-close" id="btnCloseVivaModal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="viva-grid">
-          <div class="viva-section">
-            <h4>💡 Core Novelty (30-Second Elevator Pitch)</h4>
-            <p>Standard FedAvg weights institutions purely by dataset size (<em>n<sub>i</sub></em>). FedTrust-Credit collects <strong>TreeSHAP explanation consensus vectors</strong> across banks without sharing raw data. Clients aligning with consensus receive an aggregation gain factor (&gamma;), boosting cross-institutional consistency (+68.4%) and naturally isolating Byzantine attackers without exposing customer records.</p>
-          </div>
-          <div class="viva-section">
-            <h4>☁️ Multi-Instance Cloud Infrastructure</h4>
-            <ul class="viva-list">
-              <li><strong>2 Distributed EC2 Nodes:</strong> Primary Node (Aggregator + B1 + B2 on <code>13.218.90.189</code>) &amp; Remote Bank Node (Bank 3 Subprime) communicating over AWS IPv4 REST.</li>
-              <li><strong>Amazon S3:</strong> <code>fedtrust-models</code> bucket for model serialization and registry.</li>
-              <li><strong>Amazon CloudWatch:</strong> Namespace <code>FedTrustCredit/FL</code> logging real-time probability, consistency, and API latency.</li>
-              <li><strong>Amazon SNS:</strong> Automated instant email alerts when borrower default probability &ge; 35%.</li>
-              <li><strong>AWS IAM:</strong> Zero credentials in code; least-privilege EC2 instance profiles.</li>
-            </ul>
-          </div>
-          <div class="viva-section">
-            <h4>📊 Empirical Benchmark Ground Truth</h4>
-            <div class="viva-stats">
-              <div class="viva-stat"><span>Pooled Accuracy:</span> <strong>85.34%</strong></div>
-              <div class="viva-stat"><span>ROC-AUC:</span> <strong>0.6574</strong></div>
-              <div class="viva-stat"><span>Consistency Score:</span> <strong>0.8141</strong></div>
-              <div class="viva-stat"><span>Bandwidth Overhead:</span> <strong>+1.31%</strong></div>
-              <div class="viva-stat"><span>Lending Club Size:</span> <strong>1,344,976 loans</strong></div>
-              <div class="viva-stat"><span>Automated Tests:</span> <strong>25/25 Passing</strong></div>
-            </div>
-          </div>
-          <div class="viva-section">
-            <h4>🎯 Top 3 Anticipated Viva Questions &amp; Answers</h4>
-            <div class="viva-qa">
-              <p><strong>Q1: Does transmitting SHAP vectors violate GDPR or leak private borrower data?</strong><br/>
-              <em>Answer:</em> No. TreeSHAP vectors are 82 aggregated scalar feature-importance coefficients across an anchor distribution, not individual rows. Furthermore, we implemented calibrated Differential Privacy (&epsilon;-DP with Gaussian noise) to formally bound leakage.</p>
-              
-              <p><strong>Q2: How does the system defend against rogue or Byzantine banks?</strong><br/>
-              <em>Answer:</em> If Bank 3 flips labels or poisons weights, its feature attribution flips, causing its Spearman agreement score to drop. The aggregator automatically slashes its aggregation weight from 25.0% down to ~2.1%, neutralizing the attack.</p>
-              
-              <p><strong>Q3: Why not pool the data into one central cloud database?</strong><br/>
-              <em>Answer:</em> In real banking, GLBA, GDPR, and Fair Lending regulations strictly prohibit pooling raw borrower records across independent institutions. Federated learning enables collaborative training without data centralisation.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <script src="/static/app.js"></script>

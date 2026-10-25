@@ -518,31 +518,10 @@ function formatFeatureName(raw) {
 }
 
 
-/* ── 5. Review & Viva Improvisations ────────────────────────────────────────── */
+/* ── 5. Review & Enterprise Features ────────────────────────────────────────── */
 
 function initReviewImprovisations() {
-  // 1. Viva Defense Modal
-  const btnOpenViva = document.getElementById("btnOpenVivaModal");
-  const btnCloseViva = document.getElementById("btnCloseVivaModal");
-  const vivaModal = document.getElementById("vivaModal");
-
-  if (btnOpenViva && vivaModal) {
-    btnOpenViva.addEventListener("click", () => {
-      vivaModal.style.display = "flex";
-    });
-  }
-  if (btnCloseViva && vivaModal) {
-    btnCloseViva.addEventListener("click", () => {
-      vivaModal.style.display = "none";
-    });
-  }
-  if (vivaModal) {
-    vivaModal.addEventListener("click", (e) => {
-      if (e.target === vivaModal) vivaModal.style.display = "none";
-    });
-  }
-
-  // 2. 1-Click Byzantine Defense Demo
+  // 1. 1-Click Byzantine Defense Demo
   const btnByzantine = document.getElementById("btnByzantineQuickDemo");
   const attackSelect = document.getElementById("attackSelect");
   const gainSlider = document.getElementById("gainSlider");
