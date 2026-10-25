@@ -60,6 +60,39 @@ async function loadCloudStatus() {
       }
     }
 
+    // Check cluster topology for live Bank 3 EC2 remote node
+    try {
+      const clusterRes = await fetch("/api/nodes/cluster");
+      if (clusterRes.ok) {
+        const clusterData = await clusterRes.json();
+        const b3 = clusterData.cluster_nodes?.bank_3;
+        const b3Dot = document.getElementById("bank3StatusDot");
+        const b3Meta = document.getElementById("bank3NodeMeta");
+        const b3Daemon = document.getElementById("bank3DaemonStatus");
+        const b3Ip = document.getElementById("bank3IpLabel");
+        const b3Latency = document.getElementById("bank3LatencyLabel");
+
+        if (b3 && b3.last_heartbeat) {
+          const isOnline = b3.status === "online";
+          if (b3Dot) {
+            b3Dot.className = "provider-status-dot " + (isOnline ? "online" : "offline");
+          }
+          if (b3Meta) {
+            b3Meta.textContent = `Host: ${b3.hostname || b3.ip_address} · Beat: ${b3.heartbeat_age_sec || 0}s ago`;
+          }
+          if (b3Daemon) {
+            b3Daemon.textContent = isOnline ? "Connected" : "Offline";
+          }
+          if (b3Ip) {
+            b3Ip.textContent = b3.ip_address || "Connected";
+          }
+          if (b3Latency) {
+            b3Latency.textContent = "REST (Active)";
+          }
+        }
+      }
+    } catch (_) {}
+
     if (lastRefresh) {
       lastRefresh.textContent = "Last refreshed: " + new Date().toLocaleTimeString();
     }

@@ -23,7 +23,7 @@ import lightgbm as lgb
 import numpy as np
 import pandas as pd
 import shap
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -594,6 +594,92 @@ def upload_models_s3(req: S3UploadRequest):
     if not _AWS_MODULE_OK or cloud_manager is None:
         return _aws_unavailable("boto3 not installed in container image.")
     return cloud_manager.upload_models_to_s3(bucket_name=req.bucket_name or None)
+
+
+# ── Multi-Instance EC2 Cluster Registry ──────────────────────────────────────
+
+class NodeHeartbeatRequest(BaseModel):
+    node_id: str = Field(..., description="Unique node identifier, e.g. bank_3")
+    role: str = Field(default="remote_bank_client", description="Role: aggregator or remote_bank_client")
+    portfolio: str = Field(default="Subprime Portfolio (Grades E-G)", description="Portfolio description")
+    ip_address: Optional[str] = Field(default=None, description="Reported public or private IP")
+    hostname: Optional[str] = Field(default=None, description="Host machine name")
+    status: str = Field(default="online", description="Node status")
+    cpu_percent: Optional[float] = Field(default=None, description="CPU usage percent")
+    ram_percent: Optional[float] = Field(default=None, description="RAM usage percent")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Custom node metadata")
+
+
+_CLUSTER_NODES: Dict[str, Dict[str, Any]] = {
+    "node_primary": {
+        "node_id": "node_primary",
+        "instance_name": "AWS EC2 Primary Node (Instance 1)",
+        "role": "aggregator_and_local_banks",
+        "portfolio": "Prime (Grades A/B) + Standard (Grades C/D)",
+        "region": "us-east-1",
+        "ip_address": "13.218.90.189",
+        "status": "online",
+        "last_heartbeat": time.time(),
+        "is_remote": False,
+    },
+    "bank_3": {
+        "node_id": "bank_3",
+        "instance_name": "AWS EC2 Remote Bank Node (Instance 2)",
+        "role": "remote_bank_client",
+        "portfolio": "Subprime Portfolio (Grades E–G)",
+        "region": "us-east-1 (or remote)",
+        "ip_address": "Awaiting connection...",
+        "status": "standby",
+        "last_heartbeat": None,
+        "is_remote": True,
+    },
+}
+
+
+@app.post("/api/nodes/heartbeat")
+def receive_node_heartbeat(req: NodeHeartbeatRequest, request: Request):
+    """Called by remote EC2 instances (Bank 3) to register their presence and telemetry."""
+    client_ip = req.ip_address or (request.client.host if request.client else "unknown")
+    _CLUSTER_NODES[req.node_id] = {
+        "node_id": req.node_id,
+        "instance_name": f"AWS EC2 Remote Node ({req.node_id.upper()})",
+        "role": req.role,
+        "portfolio": req.portfolio,
+        "region": req.metadata.get("region", "us-east-1"),
+        "ip_address": client_ip,
+        "hostname": req.hostname,
+        "status": "online",
+        "last_heartbeat": time.time(),
+        "cpu_percent": req.cpu_percent,
+        "ram_percent": req.ram_percent,
+        "is_remote": True,
+        "metadata": req.metadata,
+    }
+    return {
+        "status": "acknowledged",
+        "node_id": req.node_id,
+        "client_ip": client_ip,
+        "timestamp": time.time(),
+        "aggregator_version": "1.0.0",
+    }
+
+
+@app.get("/api/nodes/cluster")
+def get_cluster_topology():
+    """Returns the live topology and status of all EC2 nodes in the cluster."""
+    now = time.time()
+    nodes_out = {}
+    for nid, node in _CLUSTER_NODES.items():
+        copy_node = dict(node)
+        if copy_node["is_remote"] and copy_node["last_heartbeat"]:
+            age = now - copy_node["last_heartbeat"]
+            copy_node["heartbeat_age_sec"] = round(age, 1)
+            if age > 45:
+                copy_node["status"] = "offline"
+            else:
+                copy_node["status"] = "online"
+        nodes_out[nid] = copy_node
+    return {"cluster_nodes": nodes_out, "total_nodes": len(nodes_out), "timestamp": now}
 
 
 # ── Mount Static Frontend Assets ──────────────────────────────────────────────

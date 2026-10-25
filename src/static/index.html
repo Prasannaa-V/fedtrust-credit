@@ -517,28 +517,28 @@
                 <text x="0" y="36" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#FF9900">AWS</text>
               </svg>
             </div>
-            <div class="provider-status-dot online"></div>
+            <div class="provider-status-dot online" id="bank3StatusDot"></div>
           </div>
           <div class="provider-info">
-            <h3>Bank 3 — AWS VPC 3</h3>
-            <p>Region: <strong>us-east-1</strong></p>
-            <p>Role: Subprime Client Node (Grades E–G)</p>
+            <h3>Bank 3 — AWS EC2 Remote Node</h3>
+            <p>Instance: <strong>Secondary EC2 VM (Isolated)</strong></p>
+            <p id="bank3NodeMeta">Role: Subprime Portfolio (Grades E–G)</p>
           </div>
-          <div class="provider-services">
+          <div class="provider-services" id="bank3ServicesList">
             <div class="service-row service-ok">
-              <span class="svc-dot ok"></span>
-              <span class="svc-name">Docker Container (vpc-bank-3)</span>
-              <span class="svc-status-label">Running</span>
+              <span class="svc-dot ok" id="bank3Dot1"></span>
+              <span class="svc-name">Client Daemon (remote_bank_client)</span>
+              <span class="svc-status-label" id="bank3DaemonStatus">Active</span>
             </div>
             <div class="service-row service-ok">
-              <span class="svc-dot ok"></span>
-              <span class="svc-name">Bank 3 LightGBM Client</span>
-              <span class="svc-status-label">Deployed</span>
+              <span class="svc-dot ok" id="bank3Dot2"></span>
+              <span class="svc-name">Public IPv4 Connection</span>
+              <span class="svc-status-label" id="bank3IpLabel">Connected</span>
             </div>
             <div class="service-row service-ok">
-              <span class="svc-dot ok"></span>
-              <span class="svc-name">Isolated Bridge Network</span>
-              <span class="svc-status-label">Active</span>
+              <span class="svc-dot ok" id="bank3Dot3"></span>
+              <span class="svc-name">Cross-Instance Communication</span>
+              <span class="svc-status-label" id="bank3LatencyLabel">REST API (Port 8000)</span>
             </div>
           </div>
         </div>
