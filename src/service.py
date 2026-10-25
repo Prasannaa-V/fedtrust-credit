@@ -16,7 +16,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import joblib
 import lightgbm as lgb
@@ -222,7 +222,11 @@ class CreditRiskEngine:
             row["delinq_2yrs"] = float(applicant.get("delinq_2yrs", 0.0))
 
         # Term: one-hot (column names are like term_36.0 or term_60.0)
-        term_val = str(float(applicant.get("term", 36)))
+        raw_term = applicant.get("term", 36)
+        if isinstance(raw_term, str):
+            digits = "".join([c for c in raw_term if c.isdigit()])
+            raw_term = float(digits) if digits else 36.0
+        term_val = str(float(raw_term))
         term_col = f"term_{term_val}"
         if term_col in row:
             row[term_col] = 1
@@ -438,7 +442,7 @@ class SimulateRoundRequest(BaseModel):
 
 class LoanApplicantRequest(BaseModel):
     loan_amnt: float = Field(default=15000.0, ge=1000.0, le=50000.0)
-    term: int = Field(default=36, description="36 or 60 months")
+    term: Union[int, str] = Field(default=36, description="36 or 60 months")
     int_rate: float = Field(default=11.5, ge=4.0, le=35.0)
     grade: str = Field(default="B", description="A, B, C, D, E, F, or G")
     annual_inc: float = Field(default=75000.0, ge=10000.0, le=1000000.0)
@@ -510,9 +514,13 @@ def simulate_federated_round(req: SimulateRoundRequest):
 
     # Cloud Telemetry: Log Explanation Consistency Score to Amazon CloudWatch
     if _AWS_MODULE_OK and cloud_manager is not None:
-        cloud_manager.log_metric_to_cloudwatch("ExplanationConsistencyScore", global_cons, "None")
-        cloud_manager.log_latency_to_cloudwatch(
-            "simulate-round", time.perf_counter() - _sim_start)
+        try:
+            cloud_manager.log_metric_to_cloudwatch("ExplanationConsistencyScore", global_cons, "None")
+            if hasattr(cloud_manager, "log_latency_to_cloudwatch"):
+                cloud_manager.log_latency_to_cloudwatch(
+                    "simulate-round", time.perf_counter() - _sim_start)
+        except Exception as e:
+            print(f"[simulate-round] Telemetry warning (non-fatal): {e}")
 
     return {
         "consistency_gain": req.consistency_gain,
@@ -553,11 +561,15 @@ def predict_credit_risk(applicant: LoanApplicantRequest):
     if "default_probability_pct" in res:
         prob = float(res["default_probability_pct"])  # already a percentage, e.g. 14.45
         if _AWS_MODULE_OK and cloud_manager is not None:
-            cloud_manager.log_metric_to_cloudwatch("DefaultProbability", prob, "None")
-            cloud_manager.log_latency_to_cloudwatch("predict-risk", _pred_elapsed)
-            # Trigger AWS SNS email/SMS alert if applicant is high risk (>= 35% default chance)
-            if prob >= 35.0:
-                cloud_manager.publish_high_risk_sns_alert(applicant.model_dump(), prob)
+            try:
+                cloud_manager.log_metric_to_cloudwatch("DefaultProbability", prob, "None")
+                if hasattr(cloud_manager, "log_latency_to_cloudwatch"):
+                    cloud_manager.log_latency_to_cloudwatch("predict-risk", _pred_elapsed)
+                # Trigger AWS SNS email/SMS alert if applicant is high risk (>= 35% default chance)
+                if prob >= 35.0:
+                    cloud_manager.publish_high_risk_sns_alert(applicant.model_dump(), prob)
+            except Exception as e:
+                print(f"[predict-risk] Telemetry warning (non-fatal): {e}")
 
     return res
 
