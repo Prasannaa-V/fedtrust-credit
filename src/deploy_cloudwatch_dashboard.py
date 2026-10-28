@@ -22,7 +22,7 @@ WIDGETS = [
 NAMESPACE = "FedTrustCredit/FL"
 
 
-def build_body(region):
+def build_body(region, account_id="110796371357"):
     metric_widgets = []
     for i, w in enumerate(WIDGETS):
         props = {
@@ -42,8 +42,8 @@ def build_body(region):
         "properties": {
             "title": "Alarm states (consistency drift + latency)",
             "alarms": [
-                f"arn:aws:cloudwatch:{region}:*:alarm:fedtrust-consistency-drop-warning",
-                f"arn:aws:cloudwatch:{region}:*:alarm:fedtrust-round-latency-high",
+                f"arn:aws:cloudwatch:{region}:{account_id}:alarm:fedtrust-consistency-drop-warning",
+                f"arn:aws:cloudwatch:{region}:{account_id}:alarm:fedtrust-round-latency-high",
             ],
         },
     })
@@ -57,7 +57,14 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    body = build_body(args.region)
+    account_id = "110796371357"
+    try:
+        import boto3
+        account_id = boto3.client("sts", region_name=args.region).get_caller_identity().get("Account", "110796371357")
+    except Exception:
+        pass
+
+    body = build_body(args.region, account_id)
     if args.dry_run:
         print(f"[dashboard] dry-run: {args.dashboard} in {args.region}")
         print(body[:500] + "...")
